@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Barbearia Fagundes</title>
+<style>
+:root{--bg:#0b0b0b;--card:#151515;--gold:#d5a84f;--txt:#f5f5f5;--muted:#aaa;--line:#2a2a2a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font:15px Arial,sans-serif}a{text-decoration:none;color:inherit}
+.container{width:min(1100px,92%);margin:auto}header{position:sticky;top:0;z-index:10;background:#0b0b0bf2;border-bottom:1px solid var(--line)}
+.nav{height:68px;display:flex;align-items:center;justify-content:space-between}.logo{font-weight:900;font-size:20px}.logo b{color:var(--gold)}nav{display:flex;gap:22px}nav a:hover{color:var(--gold)}
+.hero{min-height:570px;display:grid;place-items:center;text-align:center;padding:90px 0;background:radial-gradient(circle at 78% 22%,#d5a84f3d 0,transparent 25%),radial-gradient(circle at 18% 78%,#6a43194d 0,transparent 28%),linear-gradient(115deg,#050505f5,#11100cf2 55%,#050505fa),repeating-linear-gradient(135deg,#ffffff05 0 1px,transparent 1px 13px)}
+h1{font-size:clamp(42px,8vw,74px);margin:0 0 14px}.hero p{font-size:18px;color:#ddd;max-width:650px;line-height:1.6;margin:0 auto 28px}
+.btn{border:0;border-radius:8px;padding:14px 20px;background:var(--gold);color:#111;font-weight:800;cursor:pointer}.btn.alt{background:#292929;color:#fff}.btn.danger{background:#7b2525;color:#fff}
+section{padding:70px 0}.title{text-align:center;margin-bottom:35px}.title h2{font-size:32px;margin:0 0 8px}.muted{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:22px}.price{font-size:27px;color:var(--gold);font-weight:900;margin-top:15px}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;border:1px solid var(--line);background:#171717}
+.booking{background:#101010}.box{max-width:760px;margin:auto;background:var(--card);padding:25px;border-radius:14px;border:1px solid var(--line)}
+form{display:grid;gap:14px}input,select{width:100%;padding:13px;margin-top:6px;background:#0b0b0b;border:1px solid #383838;border-radius:7px;color:#fff;font-size:16px}
+.notice{padding:12px;border-radius:8px;background:#1c2b18;color:#bfe3ad;margin-bottom:14px;display:none}.error{background:#3a1b1b;color:#ffb1b1}
+#site{background:radial-gradient(ellipse at 5% 18%,#d5a84f12 0,transparent 26%),radial-gradient(ellipse at 95% 50%,#7a542015 0,transparent 30%),#0b0b0b}footer{text-align:center;padding:30px;border-top:1px solid var(--line);color:#888}
+#admin{}.adminbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}.stat{background:var(--card);padding:18px;border:1px solid var(--line);border-radius:10px}.stat strong{font-size:26px;color:var(--gold);display:block}.finance-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;margin:20px 0}.finance-card{padding:18px;border-radius:10px;background:#101010;border:1px solid var(--line)}.finance-card strong{font-size:24px;display:block;margin-top:7px}.positive{color:#bfe3ad}.negative{color:#ffb1b1}.filterbar{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:18px 0}.filterbar label{min-width:190px}
+.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.hidden{display:none!important}
+@media(max-width:750px){nav{display:none}.grid,.gallery,.stats,.finance-summary{grid-template-columns:1fr}.hero{min-height:500px}section{padding:55px 0}}
+</style>
+</head>
+<body>
+<header><div class="container nav"><div class="logo">BARBEARIA <b>FAGUNDES</b></div>
+<nav><a href="#servicos">Serviços</a><a href="#fotos">Fotos</a><a href="#agenda">Agendar</a><a href="#admin">Barbeiro</a></nav></div></header>
+
+<main id="site"><section class="hero"><div><h1>Seu estilo começa aqui.</h1><p>Agende seu corte online, veja nossos trabalhos e escolha o melhor horário para você.</p><a class="btn" href="#agenda">AGENDAR HORÁRIO</a></div></section>
+
+<section id="servicos"><div class="container"><div class="title"><h2>Serviços e preços</h2><p class="muted">Valores atualizados pelo painel do barbeiro.</p></div><div id="serviceCards" class="grid"></div></div></section>
+<section id="fotos"><div class="container"><div class="title"><h2>Nossos trabalhos</h2><p class="muted">Fotos reais dos cortes realizados.</p></div><div id="gallery" class="gallery"></div></div></section>
+
+<section id="agenda" class="booking"><div class="container"><div class="title"><h2>Agende seu horário</h2><p class="muted">Escolha o serviço, dia e horário.</p></div><div class="box">
+<div id="notice" class="notice"></div>
+<form id="bookingForm">
+<label>Nome<input id="name" required placeholder="Seu nome"></label>
+<label>WhatsApp<input id="phone" required placeholder="(00) 00000-0000"></label>
+<label>Serviço<select id="service" required></select></label>
+<label>Dia<input type="date" id="date" required></label>
+<label>Horário<select id="time" required></select></label>
+<button class="btn">CONFIRMAR AGENDAMENTO</button>
+</form></div></div></section>
+</main>
+
+<section id="admin"><div class="container"><div class="title"><h2>Painel do barbeiro</h2><p class="muted">Área administrativa</p></div>
+<div id="loginBox" class="box"><form id="login"><label>E-mail<input id="email" type="email" required></label><label>Senha<input id="password" type="password" required></label><button class="btn">ENTRAR</button></form></div>
+<div id="dashboard" class="hidden">
+<div class="adminbar">
+<button class="btn alt" onclick="showPanel('appointments')">Agenda</button>
+<button class="btn alt" onclick="showPanel('clients')">Clientes</button>
+<button class="btn alt" onclick="showPanel('hours')">Horários</button>
+<button class="btn alt" onclick="showPanel('services')">Serviços / Preços</button>
+<button class="btn alt" onclick="showPanel('photos')">Fotos</button>
+<button class="btn alt" onclick="showPanel('finance')">Financeiro</button>
+<button class="btn alt" onclick="showPanel('account')">Minha conta</button>
+<button class="btn" onclick="logout()">Sair</button></div>
+<div class="stats"><div class="stat">Agendamentos<strong id="statAppointments">0</strong></div><div class="stat">Clientes<strong id="statClients">0</strong></div><div class="stat">Serviços<strong id="statServices">0</strong></div><div class="stat">Horários<strong id="statHours">0</strong></div><div class="stat">Cortes no mês<strong id="statCuts">0</strong></div><div class="stat">Saldo do mês<strong id="statBalance">R$ 0,00</strong></div></div>
+<div id="panel"></div></div></div></section>
+<footer>© 2026 Barbearia Fagundes</footer>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const C=window.BARBEARIA_CONFIG||{};
+const connected=C.SUPABASE_URL&&C.SUPABASE_ANON_KEY&&!C.SUPABASE_URL.includes("COLOQUE");
+const db=connected?supabase.createClient(C.SUPABASE_URL,C.SUPABASE_ANON_KEY):null;
+let services=[];
+const fallback=[{id:"1",name:"Corte Masculino",description:"Máquina, tesoura e acabamento.",price:35,active:true},{id:"2",name:"Corte + Barba",description:"Visual completo com acabamento.",price:55,active:true},{id:"3",name:"Barba",description:"Modelagem e acabamento.",price:25,active:true}];
+const fallbackTimes=["09:00","09:30","10:00","10:30","11:00","11:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30"];
+let times=[...fallbackTimes];
+let agendaFollowingToday=true;
+let agendaTimer=null;
+let financialMonth="";
+const $=id=>document.getElementById(id);
+function msg(t,e=false){$("notice").textContent=t;$("notice").className="notice"+(e?" error":"");$("notice").style.display="block";setTimeout(()=>$("notice").style.display="none",5000)}
+function money(v){return "R$ "+Number(v).toFixed(2).replace(".",",")}
+function localDate(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)}
+function monthKey(){return localDate().slice(0,7)}
+function monthTitle(){return new Date(localDate()+"T12:00:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"})}
+function statusLabel(status){return {booked:"Agendado",confirmed:"Confirmado",completed:"Concluído",cancelled:"Cancelado"}[status]||status}
+function refreshBookingDate(){
+ const date=$("date"),today=localDate();
+ date.min=today;
+ if(date.value&&date.value<today){date.value="";fillTimes([])}
+}
+function startAgendaUpdates(){
+ if(agendaTimer)return;
+ agendaTimer=setInterval(async()=>{
+ refreshBookingDate();
+  const agendaDate=$("agendaDate");
+  if(agendaDate){
+   if(agendaFollowingToday&&agendaDate.value!==localDate())agendaDate.value=localDate();
+   if(agendaFollowingToday)await loadAgenda();
+  }
+  if(financialMonth&&financialMonth!==monthKey()){
+   await loadFinancialBalance();
+   if($("financeForm"))showPanel("finance");
+  }
+ },60000);
+}
+function viewAgendaDate(){agendaFollowingToday=false;loadAgenda()}
+function returnToToday(){agendaFollowingToday=true;$("agendaDate").value=localDate();loadAgenda()}
+async function loadServices(){
+ if(db){const r=await db.from("services").select("*").eq("active",true).order("created_at");if(!r.error)services=r.data||[]}
+ if(!services.length)services=fallback;
+ $("serviceCards").innerHTML=services.map(s=>`<div class="card"><h3>${s.name}</h3><p class="muted">${s.description||""}</p><div class="price">${money(s.price)}</div></div>`).join("");
+ $("service").innerHTML='<option value="">Selecione</option>'+services.map(s=>`<option value="${s.id}">${s.name} — ${money(s.price)}</option>`).join("");
+ $("statServices").textContent=services.length;
+}
+async function loadPhotos(){
+ let data=[];
+ if(db){const r=await db.from("photos").select("*").eq("active",true).order("created_at",{ascending:false});if(!r.error)data=r.data||[]}
+ $("gallery").innerHTML=data.length?data.map(p=>`<img src="${p.url}" alt="${p.caption||"Corte"}">`).join(""):`<div class="card"><p class="muted">Ainda não há fotos cadastradas.</p></div>`;
+}
+function fillTimes(disabled=[]){$("time").innerHTML="";times.forEach(t=>{let o=document.createElement("option");o.value=t;o.textContent=t;o.disabled=disabled.includes(t);$("time").appendChild(o)})}
+async function loadTimes(){
+ let booked=[];
+ let available=[...fallbackTimes];
+ if(db&&$("date").value){
+   const d=new Date($("date").value+"T12:00:00");
+   const weekday=d.getDay();
+   const hr=await db.from("business_hours").select("open_time,close_time,active").eq("weekday",weekday).eq("active",true).maybeSingle();
+   if(!hr.error && hr.data){
+     const [oh,om]=String(hr.data.open_time).slice(0,5).split(":").map(Number);
+     const [ch,cm]=String(hr.data.close_time).slice(0,5).split(":").map(Number);
+     const from=oh*60+om,to=ch*60+cm;
+     available=[];
+     for(let m=from;m<=to;m+=30) available.push(String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0"));
+   }else if(!hr.error && !hr.data){available=[]}
+   const r=await db.from("appointments").select("time").eq("date",$("date").value).neq("status","cancelled");
+   if(!r.error)booked=(r.data||[]).map(x=>String(x.time).slice(0,5))
+   if($("date").value===localDate()){
+     const now=new Date(),minutes=now.getHours()*60+now.getMinutes();
+     booked=booked.concat(available.filter(t=>{const [h,m]=t.split(":").map(Number);return h*60+m<=minutes}));
+   }
+ }
+ times=available;
+ fillTimes(booked);
+
+}
+$("bookingForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ if(!db){msg("O site ainda não está conectado ao banco online.",true);return}
+ const sid=$("service").value,s=services.find(x=>String(x.id)===String(sid));
+ const b={client_name:$("name").value.trim(),phone:$("phone").value.trim(),service_id:sid,date:$("date").value,time:$("time").value,status:"booked"};
+ const r=await db.from("appointments").insert(b);
+ if(r.error){
+   console.error("Supabase appointment error:",r.error);
+   if(r.error.code==="23505") msg("Esse horário já foi reservado. Escolha outro.",true);
+   else msg("Não foi possível salvar o agendamento: "+(r.error.message||"erro desconhecido"),true);
+   await loadTimes();return;
+ }
+ const cr=await db.from("clients").upsert({name:b.client_name,phone:b.phone},{onConflict:"phone"});
+ if(cr.error) console.warn("Client save error:",cr.error);
+ msg("Agendamento confirmado!");
+ const text=encodeURIComponent(`Olá! Gostaria de confirmar meu agendamento na Barbearia Fagundes.\nNome: ${b.client_name}\nServiço: ${s?.name}\nData: ${b.date.split("-").reverse().join("/")}\nHorário: ${b.time}`);
+ e.target.reset();await loadTimes();
+ if(C.WHATSAPP_NUMBER)setTimeout(()=>window.open(`https://wa.me/${C.WHATSAPP_NUMBER}?text=${text}`,"_blank"),600);
+});
+$("date").addEventListener("change",loadTimes);
+
+async function login(e){
+ e.preventDefault();if(!db)return alert("O site ainda não está conectado. Preencha config.js.");
+ const r=await db.auth.signInWithPassword({email:$("email").value,password:$("password").value});
+ if(r.error)return alert(r.error.message);$("loginBox").classList.add("hidden");$("dashboard").classList.remove("hidden");startAgendaUpdates();await loadFinancialBalance();showPanel("appointments");
+}
+$("login").addEventListener("submit",login);
+async function logout(){if(db)await db.auth.signOut();location.reload()}
+
+async function showPanel(type){
+ const p=$("panel");
+ if(type==="appointments"){
+  const today=localDate();
+  agendaFollowingToday=true;
+  p.innerHTML=`<h3>Agenda</h3><p class="muted">Exibindo o dia atual e atualizando automaticamente. Escolha outra data para consultar dias anteriores ou futuros.</p><div class="filterbar"><label>Escolha o dia<input type="date" id="agendaDate" value="${today}" onchange="viewAgendaDate()"></label><button class="btn alt" onclick="viewAgendaDate()">VER AGENDA</button><button class="btn alt" onclick="returnToToday()">VOLTAR PARA HOJE</button></div><div id="agendaContent"></div>`;
+  await loadAgenda();
+  return;
+ }
+ if(type==="finance"){
+  const r=await db.from("financial_transactions").select("*").order("transaction_date",{ascending:false}).order("created_at",{ascending:false});
+  if(r.error){p.innerHTML=`<h3>Financeiro</h3><div class="card"><p class="muted">Ainda falta criar a tabela financeira no Supabase. Execute o arquivo <b>finance.sql</b> no SQL Editor e abra esta tela novamente.</p></div>`;return}
+  const rows=r.data||[];
+  const monthRows=rows.filter(x=>String(x.transaction_date).startsWith(monthKey()));
+  const income=monthRows.filter(x=>x.type==="income").reduce((sum,x)=>sum+Number(x.amount),0);
+  const expense=monthRows.filter(x=>x.type==="expense").reduce((sum,x)=>sum+Number(x.amount),0);
+  const cuts=monthRows.filter(x=>x.type==="income"&&x.appointment_id).length;
+  const byCategory={};monthRows.filter(x=>x.type==="expense").forEach(x=>byCategory[x.category]=(byCategory[x.category]||0)+Number(x.amount));
+  const categories=Object.entries(byCategory).sort((a,b)=>b[1]-a[1]);
+  p.innerHTML=`<h3>Financeiro — ${monthTitle()}</h3><p class="muted">Os números abaixo são do mês atual. Quando o próximo mês começar, cortes e saldo voltam a zero automaticamente, sem apagar o histórico.</p><div class="finance-summary"><div class="finance-card"><span class="muted">Cortes confirmados</span><strong>${cuts}</strong></div><div class="finance-card"><span class="muted">Entradas</span><strong class="positive">${money(income)}</strong></div><div class="finance-card"><span class="muted">Saídas</span><strong class="negative">${money(expense)}</strong></div><div class="finance-card"><span class="muted">Saldo do mês</span><strong class="${income-expense>=0?"positive":"negative"}">${money(income-expense)}</strong></div></div><div class="card"><h3>Novo lançamento</h3><form id="financeForm"><label>Tipo<select id="ftype" required><option value="income">Entrada</option><option value="expense">Saída</option></select></label><label>Categoria<select id="fcategory" required><option>Serviços</option><option>Produtos</option><option>Aluguel</option><option>Contas</option><option>Fornecedores</option><option>Marketing</option><option>Equipamentos</option><option>Pró-labore</option><option>Outros</option></select></label><label>Descrição<input id="fdescription" maxlength="160" placeholder="Ex.: compra de lâminas"></label><label>Valor<input id="famount" type="number" min="0.01" step="0.01" required placeholder="0,00"></label><label>Data<input id="fdate" type="date" value="${localDate()}" required></label><button class="btn">SALVAR LANÇAMENTO</button></form></div><h3>Para onde o dinheiro está saindo neste mês</h3>${categories.length?`<div class="tablewrap"><table class="table"><tr><th>Categoria</th><th>Total gasto</th></tr>${categories.map(([name,value])=>`<tr><td>${name}</td><td class="negative">${money(value)}</td></tr>`).join("")}</table></div>`:`<p class="muted">Nenhuma saída registrada neste mês.</p>`}<h3>Histórico deste mês</h3>${monthRows.length?`<div class="tablewrap"><table class="table"><tr><th>Data</th><th>Tipo</th><th>Categoria</th><th>Descrição</th><th>Valor</th></tr>${monthRows.map(x=>`<tr><td>${String(x.transaction_date).split("-").reverse().join("/")}</td><td class="${x.type==="income"?"positive":"negative"}">${x.type==="income"?"Entrada":"Saída"}</td><td>${x.category}</td><td>${x.description||"—"}</td><td>${money(x.amount)}</td></tr>`).join("")}</table></div>`:`<p class="muted">Nenhum lançamento registrado neste mês.</p>`}<div class="card"><h3>Limpeza temporária</h3><p class="muted">Use somente para reiniciar o sistema agora. Isso apaga todos os lançamentos financeiros e todos os agendamentos, sem possibilidade de recuperação. Clientes, serviços, fotos e dados de acesso não serão apagados.</p><button class="btn danger" onclick="resetTemporaryData()">ZERAR SALDO E APAGAR AGENDAMENTOS</button></div>`;
+  $("financeForm").onsubmit=saveFinancialTransaction;
+  return;
+ }
+ if(type==="account"){
+  const {data:{user}}=await db.auth.getUser();
+  p.innerHTML=`<h3>Minha conta</h3><div class="card"><p class="muted">E-mail atual: ${user?.email||"—"}</p><p class="muted">Use esta tela depois do primeiro acesso para definir seus próprios dados de login.</p><form id="accountForm"><label>Novo e-mail<input id="accountEmail" type="email" value="${user?.email||""}" required></label><label>Senha atual<input id="currentPassword" type="password" required autocomplete="current-password"></label><label>Nova senha<input id="newPassword" type="password" minlength="8" placeholder="Mínimo de 8 caracteres" autocomplete="new-password"></label><label>Confirmar nova senha<input id="confirmPassword" type="password" minlength="8" autocomplete="new-password"></label><button class="btn">SALVAR DADOS DE ACESSO</button></form></div>`;
+  $("accountForm").onsubmit=saveAccount;
+  return;
+ }
+ if(type==="clients"){const r=await db.from("clients").select("*").order("created_at",{ascending:false});const rows=r.data||[];$("statClients").textContent=rows.length;p.innerHTML=`<h3>Clientes</h3><div class="tablewrap"><table class="table"><tr><th>Nome</th><th>WhatsApp</th></tr>${rows.map(c=>`<tr><td>${c.name}</td><td>${c.phone}</td></tr>`).join("")}</table></div>`;return}
+ if(type==="hours"){p.innerHTML=`<h3>Horários disponíveis</h3><p class="muted">Horários padrão:</p><p>${times.join(" • ")}</p><p class="muted">A configuração por dia da semana fica na tabela business_hours do banco. Podemos criar uma tela para isso na próxima versão.</p>`;$("statHours").textContent=times.length;return}
+ if(type==="services"){const r=await db.from("services").select("*").order("created_at");const rows=r.data||[];p.innerHTML=`<h3>Serviços e preços</h3><div class="card"><form id="newService"><input id="sn" placeholder="Nome" required><input id="sd" placeholder="Descrição"><input id="sp" type="number" step="0.01" placeholder="Preço" required><button class="btn">ADICIONAR</button></form></div><br><div class="tablewrap"><table class="table"><tr><th>Serviço</th><th>Preço</th><th>Ativo</th></tr>${rows.map(s=>`<tr><td>${s.name}</td><td>${money(s.price)}</td><td>${s.active?"Sim":"Não"}</td></tr>`).join("")}</table></div>`;$("newService").onsubmit=async e=>{e.preventDefault();const r=await db.from("services").insert({name:$("sn").value,description:$("sd").value,price:Number($("sp").value),active:true});if(r.error)alert(r.error.message);else{services=[];await loadServices();showPanel("services")}};return}
+ if(type==="photos"){p.innerHTML=`<h3>Fotos</h3><p class="muted">Selecione fotos dos cortes e envie para a galeria.</p><input type="file" accept="image/*" multiple id="photoFiles"><br><br><button class="btn" onclick="uploadPhotos()">ENVIAR FOTOS</button>`;return}
+}
+async function loadAgenda(){
+ const date=$("agendaDate").value;if(!date)return;
+ const r=await db.from("appointments").select("*, services(name,price)").eq("date",date).order("time");const rows=r.data||[];
+ $("agendaContent").innerHTML=rows.length?`<div class="tablewrap"><table class="table"><tr><th>Horário</th><th>Cliente</th><th>WhatsApp</th><th>Serviço</th><th>Status</th><th>Ações</th></tr>${rows.map(a=>`<tr><td>${String(a.time).slice(0,5)}</td><td>${a.client_name}</td><td>${a.phone}</td><td>${a.services?.name||""}</td><td>${statusLabel(a.status)}</td><td>${a.status==="booked"?`<button class="btn" onclick="changeAppointmentStatus('${a.id}','confirmed')">CONFIRMAR</button> `:""}${a.status==="confirmed"?`<button class="btn alt" onclick="changeAppointmentStatus('${a.id}','completed')">CONCLUIR</button> `:""}${(a.status==="booked"||a.status==="confirmed")?`<button class="btn danger" onclick="changeAppointmentStatus('${a.id}','cancelled')">CANCELAR</button>`:""}</td></tr>`).join("")}</table></div>`:`<div class="card"><p class="muted">Nenhum corte agendado para este dia.</p></div>`;
+ $("statAppointments").textContent=rows.filter(x=>x.status!=="cancelled").length;
+}
+async function saveFinancialTransaction(e){
+ e.preventDefault();
+ const item={type:$("ftype").value,category:$("fcategory").value,description:$("fdescription").value.trim()||null,amount:Number($("famount").value),transaction_date:$("fdate").value};
+ const r=await db.from("financial_transactions").insert(item);
+ if(r.error)return alert("Não foi possível salvar: "+r.error.message);
+ await loadFinancialBalance();showPanel("finance");
+}
+async function loadFinancialBalance(){
+ const r=await db.from("financial_transactions").select("type,amount,transaction_date,appointment_id");
+ financialMonth=monthKey();
+ if(r.error){$("statBalance").textContent="—";$("statCuts").textContent="—";return}
+ const monthRows=(r.data||[]).filter(x=>String(x.transaction_date).startsWith(financialMonth));
+ const balance=monthRows.reduce((sum,x)=>sum+(x.type==="income"?1:-1)*Number(x.amount),0);
+ $("statBalance").textContent=money(balance);
+ $("statCuts").textContent=monthRows.filter(x=>x.type==="income"&&x.appointment_id).length;
+}
+async function resetTemporaryData(){
+ const answer=prompt("ATENÇÃO: isso apagará TODOS os lançamentos financeiros e TODOS os agendamentos. Esta ação não pode ser desfeita.\n\nDigite APAGAR para continuar.");
+ if(answer!=="APAGAR")return;
+ const allIdsExcept="00000000-0000-0000-0000-000000000000";
+ const financial=await db.from("financial_transactions").delete().neq("id",allIdsExcept);
+ if(financial.error)return alert("Não foi possível apagar o financeiro: "+financial.error.message);
+ const appointments=await db.from("appointments").delete().neq("id",allIdsExcept);
+ if(appointments.error)return alert("O financeiro foi apagado, mas não foi possível apagar os agendamentos: "+appointments.error.message);
+ await loadFinancialBalance();
+ alert("Saldo e agendamentos foram zerados.");
+ showPanel("finance");
+}
+async function saveAccount(e){
+ e.preventDefault();
+ const email=$("accountEmail").value.trim(),currentPassword=$("currentPassword").value,newPassword=$("newPassword").value,confirmPassword=$("confirmPassword").value;
+ if(newPassword&&newPassword!==confirmPassword)return alert("A confirmação da nova senha não confere.");
+ const {data:{user}}=await db.auth.getUser();
+ const changes={};
+ if(email!==user?.email)changes.email=email;
+ if(newPassword){changes.password=newPassword;changes.current_password=currentPassword}
+ if(!Object.keys(changes).length)return alert("Nenhuma alteração foi feita.");
+ const r=await db.auth.updateUser(changes);
+ if(r.error)return alert("Não foi possível atualizar: "+r.error.message);
+ alert("Dados atualizados. Alterações de e-mail podem exigir confirmação enviada pelo Supabase.");
+ showPanel("account");
+}
+async function uploadPhotos(){
+ const files=[...$("photoFiles").files];if(!files.length)return alert("Escolha pelo menos uma foto.");
+ for(const f of files){const path=`${crypto.randomUUID()}-${f.name.replace(/[^a-zA-Z0-9._-]/g,"_")}`;const up=await db.storage.from("barbearia-fotos").upload(path,f);if(up.error){alert(up.error.message);continue}const u=db.storage.from("barbearia-fotos").getPublicUrl(path);await db.from("photos").insert({url:u.data.publicUrl,caption:"Corte",active:true})}
+ await loadPhotos();alert("Fotos enviadas!");showPanel("photos");
+}
+async function changeAppointmentStatus(id,status){
+ const action={confirmed:"confirmar",completed:"concluir",cancelled:"cancelar"}[status]||"atualizar";
+ if(!confirm(`Deseja ${action} este agendamento?`))return;
+ let appointment=null;
+ if(status==="confirmed"){
+  const check=await db.from("appointments").select("id,client_name,services(name,price)").eq("id",id).single();
+  if(check.error)return alert("Não foi possível encontrar o agendamento: "+check.error.message);
+  appointment=check.data;
+  if(!appointment.services||Number(appointment.services.price)<=0)return alert("Esse agendamento não possui um serviço com preço válido.");
+ }
+ const r=await db.from("appointments").update({status}).eq("id",id);
+ if(r.error)return alert("Não foi possível atualizar: "+r.error.message);
+ if(status==="confirmed"){
+  const entry=await db.from("financial_transactions").insert({appointment_id:appointment.id,type:"income",category:"Serviços",description:`Corte confirmado: ${appointment.services.name} — ${appointment.client_name}`,amount:Number(appointment.services.price),transaction_date:localDate()});
+  if(entry.error&&entry.error.code!=="23505"){
+   await db.from("appointments").update({status:"booked"}).eq("id",id);
+   return alert("O agendamento não foi confirmado porque a entrada financeira não pôde ser salva. Execute finance.sql no Supabase e tente novamente.");
+  }
+  await loadFinancialBalance();
+ }
+ await loadAgenda();await loadTimes();
+}
+refreshBookingDate();loadServices();loadPhotos();loadTimes();
+</script>
+</body></html>
