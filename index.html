@@ -35,16 +35,20 @@ form{display:grid;gap:14px}input,select{width:100%;padding:13px;margin-top:6px;b
 }text-align:center;padding:30px;border-top:1px solid var(--line);color:#888}
 #admin{}.adminbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}.stat{background:var(--card);padding:18px;border:1px solid var(--line);border-radius:10px}.stat strong{font-size:26px;color:var(--gold);display:block}.finance-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;margin:20px 0}.finance-card{padding:18px;border-radius:10px;background:#101010;border:1px solid var(--line)}.finance-card strong{font-size:24px;display:block;margin-top:7px}.positive{color:#bfe3ad}.negative{color:#ffb1b1}.filterbar{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:18px 0}.filterbar label{min-width:190px}
 .tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.hidden{display:none!important}
+
+.package-card{padding:0;overflow:hidden}.package-card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#0b0b0b}.package-card .package-body{padding:22px}.package-period{color:var(--gold);font-weight:800;margin:12px 0 6px}
 @media(max-width:750px){nav{display:none}.grid,.gallery,.stats,.finance-summary{grid-template-columns:1fr}.hero{min-height:500px}section{padding:55px 0}}
 </style>
 </head>
 <body>
 <header><div class="container nav"><div class="logo">BARBEARIA <b>FAGUNDES</b></div>
-<nav><a href="#servicos">Serviços</a><a href="#fotos">Fotos</a><a href="#agenda">Agendar</a><a href="#admin">Barbeiro</a></nav></div></header>
+<nav><a href="#servicos">Serviços</a><a href="#pacotes">Pacotes</a><a href="#fotos">Fotos</a><a href="#agenda">Agendar</a><a href="#admin">Barbeiro</a></nav></div></header>
 
 <main id="site"><section class="hero"><div><h1>Seu estilo começa aqui.</h1><p>Agende seu corte online, veja nossos trabalhos e escolha o melhor horário para você.</p><a class="btn" href="#agenda">AGENDAR HORÁRIO</a></div></section>
 
 <section id="servicos"><div class="container"><div class="title"><h2>Serviços e preços</h2><p class="muted">Valores atualizados pelo painel do barbeiro.</p></div><div id="serviceCards" class="grid"></div></div></section>
+<section id="pacotes"><div class="container"><div class="title"><h2>Pacotes e assinaturas</h2><p class="muted">Planos pensados para você cuidar do visual todos os meses.</p></div><div id="packageCards" class="grid"></div></div></section>
+
 <section id="fotos"><div class="container"><div class="title"><h2>Nossos trabalhos</h2><p class="muted">Fotos reais dos cortes realizados.</p></div><div id="gallery" class="gallery"></div></div></section>
 
 <section id="agenda" class="booking"><div class="container"><div class="title"><h2>Agende seu horário</h2><p class="muted">Escolha o serviço, dia e horário.</p></div><div class="box">
@@ -67,6 +71,7 @@ form{display:grid;gap:14px}input,select{width:100%;padding:13px;margin-top:6px;b
 <button class="btn alt" onclick="showPanel('clients')">Clientes</button>
 <button class="btn alt" onclick="showPanel('hours')">Horários</button>
 <button class="btn alt" onclick="showPanel('services')">Serviços / Preços</button>
+<button class="btn alt" onclick="showPanel('packages')">Pacotes / Assinaturas</button>
 <button class="btn alt" onclick="showPanel('photos')">Fotos</button>
 <button class="btn alt" onclick="showPanel('finance')">Financeiro</button>
 <button class="btn alt" onclick="showPanel('account')">Minha conta</button>
@@ -123,6 +128,11 @@ async function loadServices(){
  $("serviceCards").innerHTML=services.map(s=>`<div class="card"><h3>${s.name}</h3><p class="muted">${s.description||""}</p><div class="price">${money(s.price)}</div></div>`).join("");
  $("service").innerHTML='<option value="">Selecione</option>'+services.map(s=>`<option value="${s.id}">${s.name} — ${money(s.price)}</option>`).join("");
  $("statServices").textContent=services.length;
+}
+async function loadPackages(){
+ let rows=[];
+ if(db){const r=await db.from("membership_packages").select("*").eq("active",true).order("created_at");if(!r.error)rows=r.data||[]}
+ $("packageCards").innerHTML=rows.length?rows.map(p=>`<div class="card package-card">${p.image_url?`<img src="${p.image_url}" alt="${p.name}">`:""}<div class="package-body"><h3>${p.name}</h3><p class="muted">${p.description||""}</p><div class="package-period">${p.period||"por mês"}</div><div class="price">${money(p.price)}</div><br><a class="btn" href="#agenda">QUERO ESTE PACOTE</a></div></div>`).join(""):`<div class="card"><p class="muted">Em breve teremos pacotes e assinaturas disponíveis.</p></div>`;
 }
 async function loadPhotos(){
  let data=[];
@@ -222,7 +232,21 @@ async function showPanel(type){
   return;
  }
  if(type==="hours"){p.innerHTML=`<h3>Horários disponíveis</h3><p class="muted">Horários padrão:</p><p>${times.join(" • ")}</p><p class="muted">A configuração por dia da semana fica na tabela business_hours do banco. Podemos criar uma tela para isso na próxima versão.</p>`;$("statHours").textContent=times.length;return}
- if(type==="services"){const r=await db.from("services").select("*").order("created_at");const rows=r.data||[];p.innerHTML=`<h3>Serviços e preços</h3><div class="card"><form id="newService"><input id="sn" placeholder="Nome" required><input id="sd" placeholder="Descrição"><input id="sp" type="number" step="0.01" placeholder="Preço" required><button class="btn">ADICIONAR</button></form></div><br><div class="tablewrap"><table class="table"><tr><th>Serviço</th><th>Preço</th><th>Ativo</th></tr>${rows.map(s=>`<tr><td>${s.name}</td><td>${money(s.price)}</td><td>${s.active?"Sim":"Não"}</td></tr>`).join("")}</table></div>`;$("newService").onsubmit=async e=>{e.preventDefault();const r=await db.from("services").insert({name:$("sn").value,description:$("sd").value,price:Number($("sp").value),active:true});if(r.error)alert(r.error.message);else{services=[];await loadServices();showPanel("services")}};return}
+ if(type==="services"){
+  const r=await db.from("services").select("*").order("created_at");
+  const rows=r.data||[];
+  p.innerHTML=`<h3>Serviços e preços</h3><p class="muted">Edite o serviço quando quiser. Apagar do site apenas o oculta para os clientes e preserva agendamentos antigos.</p><div class="card"><form id="newService"><input id="sn" placeholder="Nome" required><input id="sd" placeholder="Descrição"><input id="sp" type="number" step="0.01" placeholder="Preço" required><button class="btn">ADICIONAR</button></form></div><br><div class="tablewrap"><table class="table"><tr><th>Serviço</th><th>Preço</th><th>Ativo</th><th>Ações</th></tr>${rows.map(s=>`<tr><td>${s.name}</td><td>${money(s.price)}</td><td>${s.active?"Sim":"Não"}</td><td><button class="btn alt" onclick="editService('${s.id}')">EDITAR</button> ${s.active?`<button class="btn danger" onclick="deactivateService('${s.id}')">APAGAR DO SITE</button>`:`<button class="btn" onclick="activateService('${s.id}')">REATIVAR</button>`}</td></tr>`).join("")}</table></div>`;
+  $("newService").onsubmit=async e=>{e.preventDefault();const r=await db.from("services").insert({name:$("sn").value.trim(),description:$("sd").value.trim()||null,price:Number($("sp").value),active:true});if(r.error)alert(r.error.message);else{services=[];await loadServices();showPanel("services")}};
+  return;
+ }
+ if(type==="packages"){
+  const r=await db.from("membership_packages").select("*").order("created_at");
+  if(r.error){p.innerHTML=`<h3>Pacotes e assinaturas</h3><div class="card"><p class="muted">Ainda falta criar a tabela de pacotes no Supabase. Execute a atualização do arquivo <b>finance.sql</b> no SQL Editor.</p></div>`;return}
+  const rows=r.data||[];
+  p.innerHTML=`<h3>Pacotes e assinaturas</h3><p class="muted">Cadastre, edite, troque a foto ou oculte os pacotes exibidos aos clientes.</p><div class="card"><form id="newPackage"><input id="pn" placeholder="Nome do pacote" required><input id="pd" placeholder="Descrição"><input id="pp" type="number" step="0.01" placeholder="Preço" required><input id="pper" placeholder="Período (ex.: por mês)" value="por mês"><input id="purl" type="url" placeholder="Link da foto (opcional)"><label class="muted">Ou envie uma foto de demonstração <input id="pimage" type="file" accept="image/*"></label><button class="btn">ADICIONAR PACOTE</button></form></div><br><div class="tablewrap"><table class="table"><tr><th>Foto</th><th>Pacote</th><th>Preço</th><th>Status</th><th>Ações</th></tr>${rows.map(x=>`<tr><td>${x.image_url?`<img src="${x.image_url}" alt="${x.name}" style="width:56px;height:40px;object-fit:cover;border-radius:6px">`:"—"}</td><td>${x.name}<br><span class="muted">${x.period||"por mês"}</span></td><td>${money(x.price)}</td><td>${x.active?"Ativo":"Oculto"}</td><td><button class="btn alt" onclick="editMembershipPackage('${x.id}')">EDITAR</button> <button class="btn alt" onclick="changeMembershipPackageImage('${x.id}')">TROCAR FOTO</button> ${x.active?`<button class="btn danger" onclick="deactivateMembershipPackage('${x.id}')">OCULTAR</button>`:`<button class="btn" onclick="activateMembershipPackage('${x.id}')">REATIVAR</button>`}</td></tr>`).join("")}</table></div>`;
+  $("newPackage").onsubmit=saveMembershipPackage;
+  return;
+ }
  if(type==="photos"){p.innerHTML=`<h3>Fotos</h3><p class="muted">Selecione fotos dos cortes e envie para a galeria.</p><input type="file" accept="image/*" multiple id="photoFiles"><br><br><button class="btn" onclick="uploadPhotos()">ENVIAR FOTOS</button>`;return}
 }
 async function loadAgenda(){
@@ -268,6 +292,76 @@ async function resetTemporaryData(){
  await loadFinancialBalance();
  alert("Saldo e agendamentos foram zerados.");
  showPanel("finance");
+}
+async function uploadMembershipPackageImage(file){
+ const path=`pacotes/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,"_")}`;
+ const up=await db.storage.from("barbearia-fotos").upload(path,file);
+ if(up.error)throw new Error(up.error.message);
+ return db.storage.from("barbearia-fotos").getPublicUrl(path).data.publicUrl;
+}
+async function saveMembershipPackage(e){
+ e.preventDefault();
+ let imageUrl=$("purl").value.trim()||null;
+ const file=$("pimage").files[0];
+ if(file){try{imageUrl=await uploadMembershipPackageImage(file)}catch(error){return alert("Não foi possível enviar a foto: "+error.message)}}
+ const r=await db.from("membership_packages").insert({name:$("pn").value.trim(),description:$("pd").value.trim()||null,price:Number($("pp").value),period:$("pper").value.trim()||"por mês",image_url:imageUrl,active:true});
+ if(r.error)return alert("Não foi possível adicionar o pacote: "+r.error.message);
+ await loadPackages();showPanel("packages");
+}
+async function editMembershipPackage(id){
+ const current=await db.from("membership_packages").select("*").eq("id",id).single();
+ if(current.error)return alert("Não foi possível abrir o pacote: "+current.error.message);
+ const name=prompt("Nome do pacote:",current.data.name);if(name===null)return;
+ const description=prompt("Descrição:",current.data.description||"");if(description===null)return;
+ const price=prompt("Preço (ex.: 89.90):",current.data.price);if(price===null)return;
+ const period=prompt("Período (ex.: por mês):",current.data.period||"por mês");if(period===null)return;
+ const value=Number(String(price).replace(",","."));
+ if(!name.trim()||!Number.isFinite(value)||value<0)return alert("Informe um nome e um preço válido.");
+ const r=await db.from("membership_packages").update({name:name.trim(),description:description.trim()||null,price:value,period:period.trim()||"por mês"}).eq("id",id);
+ if(r.error)return alert("Não foi possível editar: "+r.error.message);
+ await loadPackages();showPanel("packages");
+}
+async function changeMembershipPackageImage(id){
+ const picker=document.createElement("input");picker.type="file";picker.accept="image/*";
+ picker.onchange=async()=>{const file=picker.files[0];if(!file)return;try{const imageUrl=await uploadMembershipPackageImage(file);const r=await db.from("membership_packages").update({image_url:imageUrl}).eq("id",id);if(r.error)return alert("Não foi possível trocar a foto: "+r.error.message);await loadPackages();showPanel("packages")}catch(error){alert("Não foi possível enviar a foto: "+error.message)}};
+ picker.click();
+}
+async function deactivateMembershipPackage(id){
+ if(!confirm("Ocultar este pacote da página dos clientes?"))return;
+ const r=await db.from("membership_packages").update({active:false}).eq("id",id);
+ if(r.error)return alert("Não foi possível ocultar: "+r.error.message);
+ await loadPackages();showPanel("packages");
+}
+async function activateMembershipPackage(id){
+ const r=await db.from("membership_packages").update({active:true}).eq("id",id);
+ if(r.error)return alert("Não foi possível reativar: "+r.error.message);
+ await loadPackages();showPanel("packages");
+}
+async function editService(id){
+ const current=await db.from("services").select("*").eq("id",id).single();
+ if(current.error)return alert("Não foi possível abrir o serviço: "+current.error.message);
+ const name=prompt("Nome do serviço:",current.data.name);
+ if(name===null)return;
+ const description=prompt("Descrição do serviço:",current.data.description||"");
+ if(description===null)return;
+ const price=prompt("Preço do serviço (ex.: 35.00):",current.data.price);
+ if(price===null)return;
+ const value=Number(String(price).replace(",","."));
+ if(!name.trim()||!Number.isFinite(value)||value<0)return alert("Informe um nome e um preço válido.");
+ const r=await db.from("services").update({name:name.trim(),description:description.trim()||null,price:value}).eq("id",id);
+ if(r.error)return alert("Não foi possível editar: "+r.error.message);
+ services=[];await loadServices();showPanel("services");
+}
+async function deactivateService(id){
+ if(!confirm("Remover este serviço da lista de clientes? Os agendamentos antigos serão preservados."))return;
+ const r=await db.from("services").update({active:false}).eq("id",id);
+ if(r.error)return alert("Não foi possível remover: "+r.error.message);
+ services=[];await loadServices();showPanel("services");
+}
+async function activateService(id){
+ const r=await db.from("services").update({active:true}).eq("id",id);
+ if(r.error)return alert("Não foi possível reativar: "+r.error.message);
+ services=[];await loadServices();showPanel("services");
 }
 async function deleteClient(id,encodedName){
  const name=decodeURIComponent(encodedName);
@@ -318,6 +412,6 @@ async function changeAppointmentStatus(id,status){
  }
  await loadAgenda();await loadTimes();
 }
-refreshBookingDate();loadServices();loadPhotos();loadTimes();
+refreshBookingDate();loadServices();loadPackages();loadPhotos();loadTimes();
 </script>
 </body></html>
