@@ -197,7 +197,8 @@ async function showPanel(type){
   const r=await db.from("financial_transactions").select("*").order("transaction_date",{ascending:false}).order("created_at",{ascending:false});
   if(r.error){p.innerHTML=`<h3>Financeiro</h3><div class="card"><p class="muted">Ainda falta criar a tabela financeira no Supabase. Execute o arquivo <b>finance.sql</b> no SQL Editor e abra esta tela novamente.</p></div>`;return}
   const rows=r.data||[];
-  const monthRows=rows.filter(x=>String(x.transaction_date).startsWith(monthKey()));
+  const selectedMonth=window.selectedReportMonth||monthKey();
+  const monthRows=rows.filter(x=>String(x.transaction_date).startsWith(selectedMonth));
   const income=monthRows.filter(x=>x.type==="income").reduce((sum,x)=>sum+Number(x.amount),0);
   const expense=monthRows.filter(x=>x.type==="expense").reduce((sum,x)=>sum+Number(x.amount),0);
   const cuts=monthRows.filter(x=>x.type==="income"&&x.appointment_id).length;
