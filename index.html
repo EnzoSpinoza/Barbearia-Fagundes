@@ -214,7 +214,13 @@ async function showPanel(type){
   $("accountForm").onsubmit=saveAccount;
   return;
  }
- if(type==="clients"){const r=await db.from("clients").select("*").order("created_at",{ascending:false});const rows=r.data||[];$("statClients").textContent=rows.length;p.innerHTML=`<h3>Clientes</h3><div class="tablewrap"><table class="table"><tr><th>Nome</th><th>WhatsApp</th></tr>${rows.map(c=>`<tr><td>${c.name}</td><td>${c.phone}</td></tr>`).join("")}</table></div>`;return}
+ if(type==="clients"){
+  const r=await db.from("clients").select("*").order("created_at",{ascending:false});
+  const rows=r.data||[];
+  $("statClients").textContent=rows.length;
+  p.innerHTML=`<h3>Clientes</h3><p class="muted">Apague somente cadastros de teste. Os agendamentos antigos não serão apagados.</p><div class="tablewrap"><table class="table"><tr><th>Nome</th><th>WhatsApp</th><th>Ação</th></tr>${rows.map(c=>`<tr><td>${c.name}</td><td>${c.phone}</td><td><button class="btn danger" onclick="deleteClient('${c.id}','${encodeURIComponent(c.name)}')">APAGAR</button></td></tr>`).join("")}</table></div>`;
+  return;
+ }
  if(type==="hours"){p.innerHTML=`<h3>Horários disponíveis</h3><p class="muted">Horários padrão:</p><p>${times.join(" • ")}</p><p class="muted">A configuração por dia da semana fica na tabela business_hours do banco. Podemos criar uma tela para isso na próxima versão.</p>`;$("statHours").textContent=times.length;return}
  if(type==="services"){const r=await db.from("services").select("*").order("created_at");const rows=r.data||[];p.innerHTML=`<h3>Serviços e preços</h3><div class="card"><form id="newService"><input id="sn" placeholder="Nome" required><input id="sd" placeholder="Descrição"><input id="sp" type="number" step="0.01" placeholder="Preço" required><button class="btn">ADICIONAR</button></form></div><br><div class="tablewrap"><table class="table"><tr><th>Serviço</th><th>Preço</th><th>Ativo</th></tr>${rows.map(s=>`<tr><td>${s.name}</td><td>${money(s.price)}</td><td>${s.active?"Sim":"Não"}</td></tr>`).join("")}</table></div>`;$("newService").onsubmit=async e=>{e.preventDefault();const r=await db.from("services").insert({name:$("sn").value,description:$("sd").value,price:Number($("sp").value),active:true});if(r.error)alert(r.error.message);else{services=[];await loadServices();showPanel("services")}};return}
  if(type==="photos"){p.innerHTML=`<h3>Fotos</h3><p class="muted">Selecione fotos dos cortes e envie para a galeria.</p><input type="file" accept="image/*" multiple id="photoFiles"><br><br><button class="btn" onclick="uploadPhotos()">ENVIAR FOTOS</button>`;return}
@@ -262,6 +268,14 @@ async function resetTemporaryData(){
  await loadFinancialBalance();
  alert("Saldo e agendamentos foram zerados.");
  showPanel("finance");
+}
+async function deleteClient(id,encodedName){
+ const name=decodeURIComponent(encodedName);
+ if(!confirm(`Apagar o cliente "${name}"? Esta ação não apaga os agendamentos antigos.`))return;
+ const r=await db.from("clients").delete().eq("id",id);
+ if(r.error)return alert("Não foi possível apagar o cliente: "+r.error.message);
+ alert("Cliente apagado.");
+ showPanel("clients");
 }
 async function saveAccount(e){
  e.preventDefault();
