@@ -28,3 +28,29 @@ alter table public.financial_transactions enable row level security;
 drop policy if exists "authenticated all financial transactions" on public.financial_transactions;
 create policy "authenticated all financial transactions"
 on public.financial_transactions for all to authenticated using(true) with check(true);
+
+
+-- Pacotes e assinaturas exibidos aos clientes.
+create table if not exists public.membership_packages (
+ id uuid primary key default gen_random_uuid(),
+ name text not null,
+ description text,
+ price numeric(10,2) not null default 0 check(price >= 0),
+ period text not null default 'por mês',
+ image_url text,
+ active boolean not null default true,
+ created_at timestamptz not null default now()
+);
+
+create index if not exists membership_packages_active_idx
+on public.membership_packages(active, created_at);
+
+alter table public.membership_packages enable row level security;
+
+drop policy if exists "public read active membership packages" on public.membership_packages;
+create policy "public read active membership packages"
+on public.membership_packages for select to anon, authenticated using(active=true);
+
+drop policy if exists "authenticated all membership packages" on public.membership_packages;
+create policy "authenticated all membership packages"
+on public.membership_packages for all to authenticated using(true) with check(true);
