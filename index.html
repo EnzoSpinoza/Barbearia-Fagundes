@@ -5,7 +5,7 @@
 <title>Barbearia Fagundes</title>
 <style>
 :root{--bg:#0b0b0b;--card:#151515;--gold:#d5a84f;--txt:#f5f5f5;--muted:#aaa;--line:#2a2a2a}
-*{box-sizing:border-box}body{margin:0;padding-bottom:65px;background:var(--bg);color:var(--txt);font:15px Arial,sans-serif}a{text-decoration:none;color:inherit}
+*{box-sizing:border-box}body{margin:0;padding-bottom:64px;background:var(--bg);color:var(--txt);font:15px Arial,sans-serif}a{text-decoration:none;color:inherit}
 .container{width:min(1100px,92%);margin:auto}header{position:sticky;top:0;z-index:10;background:#0b0b0bf2;border-bottom:1px solid var(--line)}
 .nav{height:68px;display:flex;align-items:center;justify-content:space-between}.logo{font-weight:900;font-size:20px}.logo b{color:var(--gold)}nav{display:flex;gap:22px}nav a:hover{color:var(--gold)}
 .hero{min-height:570px;display:grid;place-items:center;text-align:center;padding:90px 0;background:radial-gradient(circle at 78% 22%,#d5a84f3d 0,transparent 25%),radial-gradient(circle at 18% 78%,#6a43194d 0,transparent 28%),linear-gradient(115deg,#050505f5,#11100cf2 55%,#050505fa),repeating-linear-gradient(135deg,#ffffff05 0 1px,transparent 1px 13px)}
@@ -17,15 +17,18 @@ section{padding:70px 0}.title{text-align:center;margin-bottom:35px}.title h2{fon
 .booking{background:#101010}.box{max-width:760px;margin:auto;background:var(--card);padding:25px;border-radius:14px;border:1px solid var(--line)}
 form{display:grid;gap:14px}input,select{width:100%;padding:13px;margin-top:6px;background:#0b0b0b;border:1px solid #383838;border-radius:7px;color:#fff;font-size:16px}
 .notice{padding:12px;border-radius:8px;background:#1c2b18;color:#bfe3ad;margin-bottom:14px;display:none}.error{background:#3a1b1b;color:#ffb1b1}
-#site{background:radial-gradient(ellipse at 5% 18%,#d5a84f12 0,transparent 26%),radial-gradient(ellipse at 95% 50%,#7a542015 0,transparent 30%),#0b0b0b}{footer{
+#site{background:radial-gradient(ellipse at 5% 18%,#d5a84f12 0,transparent 26%),radial-gradient(ellipse at 95% 50%,#7a542015 0,transparent 30%),#0b0b0b}footer{
   position:fixed;
   bottom:0;
   left:0;
-  right:0;
   width:100%;
+  height:64px;
   z-index:999;
-  text-align:center;
-  padding:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0;
+  margin:0;
   border-top:1px solid var(--line);
   background:#0b0b0b;
   color:#888;
