@@ -3,52 +3,92 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Barbearia Fagundes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0b0b0b;--card:#151515;--gold:#d5a84f;--txt:#f5f5f5;--muted:#aaa;--line:#2a2a2a}
-*{box-sizing:border-box}body{margin:0;padding-bottom:64px;background:var(--bg);color:var(--txt);font:15px Arial,sans-serif}a{text-decoration:none;color:inherit}
-.container{width:min(1100px,92%);margin:auto}header{position:sticky;top:0;z-index:10;background:#0b0b0bf2;border-bottom:1px solid var(--line)}
-.nav{height:68px;display:flex;align-items:center;justify-content:space-between}.logo{font-weight:900;font-size:20px}.logo b{color:var(--gold)}nav{display:flex;gap:22px}nav a:hover{color:var(--gold)}
-.hero{min-height:570px;display:grid;place-items:center;text-align:center;padding:90px 0;background:radial-gradient(circle at 78% 22%,#d5a84f3d 0,transparent 25%),radial-gradient(circle at 18% 78%,#6a43194d 0,transparent 28%),linear-gradient(115deg,#050505f5,#11100cf2 55%,#050505fa),repeating-linear-gradient(135deg,#ffffff05 0 1px,transparent 1px 13px)}
-h1{font-size:clamp(42px,8vw,74px);margin:0 0 14px}.hero p{font-size:18px;color:#ddd;max-width:650px;line-height:1.6;margin:0 auto 28px}
-.btn{border:0;border-radius:8px;padding:14px 20px;background:var(--gold);color:#111;font-weight:800;cursor:pointer}.btn.alt{background:#292929;color:#fff}.btn.danger{background:#7b2525;color:#fff}
-section{padding:70px 0}.title{text-align:center;margin-bottom:35px}.title h2{font-size:32px;margin:0 0 8px}.muted{color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:22px}.price{font-size:27px;color:var(--gold);font-weight:900;margin-top:15px}
-.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;border:1px solid var(--line);background:#171717}
-.booking{background:#101010}.box{max-width:760px;margin:auto;background:var(--card);padding:25px;border-radius:14px;border:1px solid var(--line)}
-form{display:grid;gap:14px}input,select{width:100%;padding:13px;margin-top:6px;background:#0b0b0b;border:1px solid #383838;border-radius:7px;color:#fff;font-size:16px}
-.notice{padding:12px;border-radius:8px;background:#1c2b18;color:#bfe3ad;margin-bottom:14px;display:none}.error{background:#3a1b1b;color:#ffb1b1}
-#site{background:radial-gradient(ellipse at 5% 18%,#d5a84f12 0,transparent 26%),radial-gradient(ellipse at 95% 50%,#7a542015 0,transparent 30%),#0b0b0b}footer{
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  height:64px;
-  z-index:999;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:0;
-  margin:0;
-  border-top:1px solid var(--line);
-  background:#0b0b0b;
-  color:#888;
-}text-align:center;padding:30px;border-top:1px solid var(--line);color:#888}
-#admin{}.adminbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}.stat{background:var(--card);padding:18px;border:1px solid var(--line);border-radius:10px}.stat strong{font-size:26px;color:var(--gold);display:block}.finance-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;margin:20px 0}.finance-card{padding:18px;border-radius:10px;background:#101010;border:1px solid var(--line)}.finance-card strong{font-size:24px;display:block;margin-top:7px}.positive{color:#bfe3ad}.negative{color:#ffb1b1}.filterbar{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:18px 0}.filterbar label{min-width:190px}
-.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}.hidden{display:none!important}
+:root{--bg:#17130f;--bg-deep:#100d0a;--card:#221a13;--brass:#b07d3f;--brass-light:#dcae72;--txt:#f4ede1;--muted:#a89479;--line:#382c20;--serif:'Fraunces',Georgia,serif;--sans:'Work Sans',Arial,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;padding-bottom:64px;background:var(--bg);color:var(--txt);font:16px/1.6 var(--sans)}
+a{text-decoration:none;color:inherit}
+.container{width:min(1100px,92%);margin:auto}
+header{position:sticky;top:0;z-index:10;background:#17130ff2;border-bottom:1px solid var(--line);backdrop-filter:blur(6px)}
+.nav{height:72px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:var(--serif);font-weight:600;font-size:21px;letter-spacing:.01em}
+.logo b{color:var(--brass-light);font-weight:700}
+nav{display:flex;gap:28px;font-size:14.5px}
+nav a:hover{color:var(--brass-light)}
 
-.package-card{padding:0;overflow:hidden}.package-card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#0b0b0b}.package-card .package-body{padding:22px}.package-period{color:var(--gold);font-weight:800;margin:12px 0 6px}
-.modal-overlay{display:none;position:fixed;inset:0;z-index:1000;background:#000000b3;align-items:center;justify-content:center;padding:20px}
+.hero{min-height:600px;display:flex;align-items:center;padding:120px 0 90px;position:relative;overflow:hidden;background:linear-gradient(180deg,#17130f 0%,#1c160f 100%)}
+.hero::before{content:"";position:absolute;top:-10%;right:-6%;width:44%;height:120%;background:repeating-linear-gradient(58deg,var(--brass) 0 3px,transparent 3px 36px);opacity:.09;pointer-events:none}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(40px,7vw,68px);line-height:1.06;margin:0 0 18px;letter-spacing:-0.01em;position:relative}
+.hero p{font-family:var(--sans);font-size:18px;color:var(--muted);max-width:500px;line-height:1.65;margin:0 0 30px;position:relative}
+.hero .btn{position:relative}
+@keyframes heroRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.hero h1{animation:heroRise .7s ease-out both}
+.hero p{animation:heroRise .7s ease-out .12s both}
+.hero .btn{animation:heroRise .7s ease-out .24s both}
+@media(prefers-reduced-motion:reduce){.hero h1,.hero p,.hero .btn{animation:none}}
+
+.btn{border:0;border-radius:4px;padding:14px 22px;background:var(--brass);color:#17130f;font-family:var(--sans);font-weight:600;font-size:15px;cursor:pointer;transition:background .15s ease}
+.btn:hover{background:var(--brass-light)}
+.btn.alt{background:transparent;color:var(--txt);border:1px solid var(--line)}
+.btn.alt:hover{border-color:var(--brass)}
+.btn.danger{background:#7b3226;color:#fff}
+
+section{padding:76px 0}
+.title{text-align:left;margin-bottom:38px;max-width:600px;position:relative;padding-top:16px}
+.title::before{content:"";position:absolute;top:0;left:0;width:42px;height:3px;background:var(--brass)}
+.title h2{font-family:var(--serif);font-weight:600;font-size:33px;margin:0 0 8px;letter-spacing:-.01em}
+.muted{color:var(--muted)}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:24px}
+.price{font-family:var(--serif);font-size:26px;color:var(--brass-light);font-weight:600;margin-top:16px}
+
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:2px;border:1px solid var(--line);background:var(--card)}
+
+.booking{background:var(--bg-deep)}
+.box{max-width:640px;margin:auto;background:var(--card);padding:30px;border-radius:6px;border:1px solid var(--line)}
+form{display:grid;gap:16px}
+label{font-size:13.5px;color:var(--muted)}
+input,select{width:100%;padding:13px;margin-top:6px;background:var(--bg-deep);border:1px solid var(--line);border-radius:4px;color:var(--txt);font:15px var(--sans)}
+input:focus,select:focus{outline:2px solid var(--brass);outline-offset:1px;border-color:var(--brass)}
+.notice{padding:12px 14px;border-radius:6px;background:#233a1e;color:#c7e6b3;margin-bottom:14px;display:none;font-size:14px}
+.error{background:#3d1f1a;color:#f0b8ab}
+#site{background:var(--bg)}
+footer{position:fixed;bottom:0;left:0;width:100%;height:64px;z-index:999;display:flex;align-items:center;justify-content:center;padding:0;margin:0;border-top:1px solid var(--line);background:var(--bg-deep);color:var(--muted);font-family:var(--sans);font-size:14px}
+#admin{}.adminbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
+.stat{background:var(--card);padding:20px;border:1px solid var(--line);border-radius:6px}
+.stat strong{font-family:var(--serif);font-size:27px;color:var(--brass-light);display:block;font-weight:600}
+.finance-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;margin:20px 0}
+.finance-card{padding:18px;border-radius:6px;background:var(--bg-deep);border:1px solid var(--line)}
+.finance-card strong{font-family:var(--serif);font-size:23px;display:block;margin-top:7px;font-weight:600}
+.positive{color:#9fd88a}.negative{color:#e59a8c}
+.filterbar{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:18px 0}.filterbar label{min-width:190px}
+.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse}
+.table th{color:var(--muted);font-weight:600;font-size:13px}
+.table th,.table td{padding:13px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.hidden{display:none!important}
+
+.package-card{padding:0;overflow:hidden;border-radius:6px}
+.package-card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--bg-deep)}
+.package-card .package-body{padding:22px}
+.package-period{font-family:var(--sans);color:var(--brass-light);font-weight:600;font-size:13px;letter-spacing:.02em;margin:12px 0 4px}
+.modal-overlay{display:none;position:fixed;inset:0;z-index:1000;background:#0d0a08cc;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.open{display:flex}
-.modal-box{max-width:420px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:25px;position:relative}
-.modal-close{position:absolute;top:10px;right:14px;background:none;border:0;color:#fff;font-size:24px;cursor:pointer;line-height:1}
-@media(max-width:750px){nav{display:none}.grid,.gallery,.stats,.finance-summary{grid-template-columns:1fr}.hero{min-height:500px}section{padding:55px 0}}
+.modal-box{max-width:420px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:25px;position:relative}
+.modal-close{position:absolute;top:10px;right:14px;background:none;border:0;color:var(--txt);font-size:24px;cursor:pointer;line-height:1}
+@media(max-width:750px){nav{display:none}.grid,.gallery,.stats,.finance-summary{grid-template-columns:1fr}.hero{min-height:520px}.hero::before{display:none}section{padding:56px 0}}
 </style>
 </head>
 <body>
 <header><div class="container nav"><div class="logo">BARBEARIA <b>FAGUNDES</b></div>
 <nav><a href="#servicos">Serviços</a><a href="#pacotes">Pacotes</a><a href="#fotos">Fotos</a><a href="#agenda">Agendar</a><a href="#admin">Barbeiro</a></nav></div></header>
 
-<main id="site"><section class="hero"><div><h1>Seu estilo começa aqui.</h1><p>Agende seu corte online, veja nossos trabalhos e escolha o melhor horário para você.</p><a class="btn" href="#agenda">AGENDAR HORÁRIO</a></div></section>
+<main id="site"><section class="hero"><div class="container"><h1>Seu estilo começa aqui.</h1><p>Agende seu corte online, veja nossos trabalhos e escolha o melhor horário para você.</p><a class="btn" href="#agenda">Agendar horário</a></div></section>
 
 <section id="servicos"><div class="container"><div class="title"><h2>Serviços e preços</h2><p class="muted">Valores atualizados pelo painel do barbeiro.</p></div><div id="serviceCards" class="grid"></div></div></section>
 <section id="pacotes"><div class="container"><div class="title"><h2>Pacotes e assinaturas</h2><p class="muted">Planos pensados para você cuidar do visual todos os meses.</p></div><div id="packageCards" class="grid"></div></div></section>
@@ -63,7 +103,7 @@ form{display:grid;gap:14px}input,select{width:100%;padding:13px;margin-top:6px;b
 <label>Serviço<select id="service" required></select></label>
 <label>Dia<input type="date" id="date" required></label>
 <label>Horário<select id="time" required></select></label>
-<button class="btn">CONFIRMAR AGENDAMENTO</button>
+<button class="btn">Confirmar agendamento</button>
 </form></div></div></section>
 </main>
 
@@ -92,7 +132,7 @@ form{display:grid;gap:14px}input,select{width:100%;padding:13px;margin-top:6px;b
 </div>
 
 <section id="admin"><div class="container"><div class="title"><h2>Painel do barbeiro</h2><p class="muted">Área administrativa</p></div>
-<div id="loginBox" class="box"><form id="login"><label>E-mail<input id="email" type="email" required></label><label>Senha<input id="password" type="password" required></label><button class="btn">ENTRAR</button></form></div>
+<div id="loginBox" class="box"><form id="login"><label>E-mail<input id="email" type="email" required></label><label>Senha<input id="password" type="password" required></label><button class="btn">Entrar</button></form></div>
 <div id="dashboard" class="hidden">
 <div class="adminbar">
 <button class="btn alt" onclick="showPanel('appointments')">Agenda</button>
