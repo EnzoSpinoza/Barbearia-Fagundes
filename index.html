@@ -80,6 +80,14 @@ form{display:grid;gap:14px}input,select{width:100%;padding:13px;margin-top:6px;b
       <label>Horário<select id="pkgTime" required></select></label>
       <button class="btn">CONFIRMAR AGENDAMENTO DO PACOTE</button>
     </form>
+    <div id="pixPaymentBox" class="hidden">
+      <p class="muted">Agendamento confirmado! Para garantir sua vaga, finalize o pagamento do pacote via PIX:</p>
+      <p style="text-align:center;margin:14px 0"><strong id="pixAmount" style="color:var(--gold);font-size:22px"></strong></p>
+      <div id="pixQr" style="display:flex;justify-content:center;background:#fff;padding:10px;border-radius:10px;width:fit-content;margin:auto"></div>
+      <label style="margin-top:16px">Chave PIX<input id="pixKeyDisplay" readonly></label>
+      <button type="button" class="btn alt" style="margin-top:10px" onclick="copyPixKey(event)">COPIAR CHAVE PIX</button>
+      <button type="button" class="btn" style="margin-top:10px" onclick="closePackageModal()">JÁ PAGUEI / FECHAR</button>
+    </div>
   </div>
 </div>
 
@@ -103,6 +111,7 @@ form{display:grid;gap:14px}input,select{width:100%;padding:13px;margin-top:6px;b
 
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script>
 const C=window.BARBEARIA_CONFIG||{};
 const connected=C.SUPABASE_URL&&C.SUPABASE_ANON_KEY&&!C.SUPABASE_URL.includes("COLOQUE");
@@ -115,7 +124,45 @@ let agendaFollowingToday=true;
 let agendaTimer=null;
 let financialMonth="";
 let selectedPackage=null;
+let businessSettings={};
 const $=id=>document.getElementById(id);
+function pixSanitize(s){return (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase().replace(/[^A-Z0-9 ]/g,"").trim()}
+function crc16(str){
+ let crc=0xFFFF;
+ for(let i=0;i<str.length;i++){
+  crc^=str.charCodeAt(i)<<8;
+  for(let j=0;j<8;j++){
+   crc=(crc&0x8000)!==0?((crc<<1)^0x1021)&0xFFFF:(crc<<1)&0xFFFF;
+  }
+ }
+ return crc.toString(16).toUpperCase().padStart(4,"0");
+}
+function tlv(id,value){return id+String(value.length).padStart(2,"0")+value}
+function buildPixPayload(key,name,city,amount){
+ let payload=tlv("00","01");
+ payload+=tlv("26",tlv("00","br.gov.bcb.pix")+tlv("01",key));
+ payload+=tlv("52","0000");
+ payload+=tlv("53","986");
+ if(amount)payload+=tlv("54",Number(amount).toFixed(2));
+ payload+=tlv("58","BR");
+ payload+=tlv("59",pixSanitize(name||"BARBEARIA FAGUNDES").substring(0,25)||"BARBEARIA FAGUNDES");
+ payload+=tlv("60",pixSanitize(city||"SAO PAULO").substring(0,15)||"SAO PAULO");
+ payload+=tlv("62",tlv("05","***"));
+ payload+="6304";
+ return payload+crc16(payload);
+}
+async function loadBusinessSettings(){
+ if(!db)return;
+ const r=await db.from("business_settings").select("*").eq("id",true).maybeSingle();
+ if(!r.error&&r.data)businessSettings=r.data;
+}
+function copyPixKey(e){
+ const el=$("pixKeyDisplay");
+ el.select();
+ navigator.clipboard?.writeText(el.value);
+ const b=e?.target;
+ if(b){const old=b.textContent;b.textContent="COPIADO!";setTimeout(()=>b.textContent=old,1500)}
+}
 function msg(t,e=false){$("notice").textContent=t;$("notice").className="notice"+(e?" error":"");$("notice").style.display="block";setTimeout(()=>$("notice").style.display="none",5000)}
 function money(v){return "R$ "+Number(v).toFixed(2).replace(".",",")}
 function localDate(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)}
@@ -154,7 +201,7 @@ async function loadServices(){
 async function loadPackages(){
  let rows=[];
  if(db){const r=await db.from("membership_packages").select("*").eq("active",true).order("created_at");if(!r.error)rows=r.data||[]}
- $("packageCards").innerHTML=rows.length?rows.map(p=>`<div class="card package-card">${p.image_url?`<img src="${p.image_url}" alt="${p.name}">`:""}<div class="package-body"><h3>${p.name}</h3><p class="muted">${p.description||""}</p><div class="package-period">${p.period||"por mês"}</div><div class="price">${money(p.price)}</div><br><button type="button" class="btn pacote-btn" data-pid="${p.id}" data-pname="${(p.name||"").replace(/"/g,"&quot;")}">QUERO ESTE PACOTE</button></div></div>`).join(""):`<div class="card"><p class="muted">Em breve teremos pacotes e assinaturas disponíveis.</p></div>`;
+ $("packageCards").innerHTML=rows.length?rows.map(p=>`<div class="card package-card">${p.image_url?`<img src="${p.image_url}" alt="${p.name}">`:""}<div class="package-body"><h3>${p.name}</h3><p class="muted">${p.description||""}</p><div class="package-period">${p.period||"por mês"}</div><div class="price">${money(p.price)}</div><br><button type="button" class="btn pacote-btn" data-pid="${p.id}" data-pname="${(p.name||"").replace(/"/g,"&quot;")}" data-pprice="${p.price}">QUERO ESTE PACOTE</button></div></div>`).join(""):`<div class="card"><p class="muted">Em breve teremos pacotes e assinaturas disponíveis.</p></div>`;
 }
 async function loadPhotos(){
  let data=[];
@@ -209,10 +256,12 @@ $("bookingForm").addEventListener("submit",async e=>{
 $("date").addEventListener("change",loadTimes);
 
 /* ===== AGENDAMENTO DE PACOTE (modal) ===== */
-function openPackageModal(id,name){
- selectedPackage={id,name};
+function openPackageModal(id,name,price){
+ selectedPackage={id,name,price:Number(price)};
  $("packageModalName").textContent=name;
  $("packageBookingForm").reset();
+ $("packageBookingForm").classList.remove("hidden");
+ $("pixPaymentBox").classList.add("hidden");
  $("packageNotice").style.display="none";
  $("pkgDate").min=localDate();
  fillPackageTimes();
@@ -238,7 +287,7 @@ async function loadPackageTimes(){
 $("pkgDate").addEventListener("change",loadPackageTimes);
 document.addEventListener("click",e=>{
  const btn=e.target.closest(".pacote-btn");
- if(btn)openPackageModal(btn.dataset.pid,btn.dataset.pname);
+ if(btn)openPackageModal(btn.dataset.pid,btn.dataset.pname,btn.dataset.pprice);
 });
 $("packageBookingForm").addEventListener("submit",async e=>{
  e.preventDefault();
@@ -256,12 +305,22 @@ $("packageBookingForm").addEventListener("submit",async e=>{
  }
  const cr=await db.from("clients").upsert({name:b.client_name,phone:b.phone},{onConflict:"phone"});
  if(cr.error)console.warn("Client save error:",cr.error);
- $("packageNotice").className="notice";
- $("packageNotice").style.display="block";
- $("packageNotice").textContent="Agendamento do pacote confirmado!";
  const text=encodeURIComponent(`Olá! Gostaria de confirmar meu agendamento do pacote na Barbearia Fagundes.\nNome: ${b.client_name}\nPacote: ${selectedPackage.name}\nData: ${b.date.split("-").reverse().join("/")}\nHorário: ${b.time}`);
  if(C.WHATSAPP_NUMBER)setTimeout(()=>window.open(`https://wa.me/${C.WHATSAPP_NUMBER}?text=${text}`,"_blank"),600);
- setTimeout(closePackageModal,1600);
+ if(businessSettings.pix_key){
+  $("packageBookingForm").classList.add("hidden");
+  $("pixAmount").textContent=money(selectedPackage.price);
+  $("pixKeyDisplay").value=businessSettings.pix_key;
+  $("pixQr").innerHTML="";
+  const payload=buildPixPayload(businessSettings.pix_key,businessSettings.pix_receiver_name,businessSettings.pix_city,selectedPackage.price);
+  new QRCode($("pixQr"),{text:payload,width:180,height:180});
+  $("pixPaymentBox").classList.remove("hidden");
+ }else{
+  $("packageNotice").className="notice";
+  $("packageNotice").style.display="block";
+  $("packageNotice").textContent="Agendamento do pacote confirmado! O barbeiro ainda não cadastrou uma chave PIX, então o pagamento pode ser combinado diretamente.";
+  setTimeout(closePackageModal,2200);
+ }
 });
 
 async function login(e){
@@ -304,8 +363,10 @@ async function showPanel(type){
  }
  if(type==="account"){
   const {data:{user}}=await db.auth.getUser();
-  p.innerHTML=`<h3>Minha conta</h3><div class="card"><p class="muted">E-mail atual: ${user?.email||"—"}</p><p class="muted">Use esta tela depois do primeiro acesso para definir seus próprios dados de login.</p><form id="accountForm"><label>Novo e-mail<input id="accountEmail" type="email" value="${user?.email||""}" required></label><label>Senha atual<input id="currentPassword" type="password" required autocomplete="current-password"></label><label>Nova senha<input id="newPassword" type="password" minlength="8" placeholder="Mínimo de 8 caracteres" autocomplete="new-password"></label><label>Confirmar nova senha<input id="confirmPassword" type="password" minlength="8" autocomplete="new-password"></label><button class="btn">SALVAR DADOS DE ACESSO</button></form></div>`;
+  await loadBusinessSettings();
+  p.innerHTML=`<h3>Minha conta</h3><div class="card"><p class="muted">E-mail atual: ${user?.email||"—"}</p><p class="muted">Use esta tela depois do primeiro acesso para definir seus próprios dados de login.</p><form id="accountForm"><label>Novo e-mail<input id="accountEmail" type="email" value="${user?.email||""}" required></label><label>Senha atual<input id="currentPassword" type="password" required autocomplete="current-password"></label><label>Nova senha<input id="newPassword" type="password" minlength="8" placeholder="Mínimo de 8 caracteres" autocomplete="new-password"></label><label>Confirmar nova senha<input id="confirmPassword" type="password" minlength="8" autocomplete="new-password"></label><button class="btn">SALVAR DADOS DE ACESSO</button></form></div><div class="card" style="margin-top:18px"><h3>Chave PIX para pagamento dos pacotes</h3><p class="muted">Essa chave e esse nome aparecem no QR code que os clientes usam para pagar um pacote pelo site.</p><form id="pixForm"><label>Chave PIX (CPF, CNPJ, e-mail, telefone ou aleatória)<input id="pixKey" value="${businessSettings.pix_key||""}" required placeholder="Ex.: 00000000000"></label><label>Nome do recebedor<input id="pixReceiverName" value="${businessSettings.pix_receiver_name||""}" required placeholder="Ex.: Barbearia Fagundes" maxlength="25"></label><label>Cidade<input id="pixCity" value="${businessSettings.pix_city||""}" required placeholder="Ex.: Sao Paulo" maxlength="15"></label><button class="btn">SALVAR CHAVE PIX</button></form></div>`;
   $("accountForm").onsubmit=saveAccount;
+  $("pixForm").onsubmit=savePixSettings;
   return;
  }
  if(type==="clients"){
@@ -341,9 +402,18 @@ async function loadAgenda(){
 }
 async function loadPackageAgenda(){
  const date=$("pkgAgendaDate").value;if(!date)return;
- const r=await db.from("appointments").select("*, membership_packages(name)").eq("date",date).not("package_id","is",null).order("time");
+ const r=await db.from("appointments").select("*, membership_packages(name,price)").eq("date",date).not("package_id","is",null).order("time");
  const rows=r.data||[];
- $("pkgAgendaContent").innerHTML=rows.length?`<div class="tablewrap"><table class="table"><tr><th>Horário</th><th>Cliente</th><th>WhatsApp</th><th>Pacote</th><th>Status</th><th>Ações</th></tr>${rows.map(a=>`<tr><td>${String(a.time).slice(0,5)}</td><td>${a.client_name}</td><td>${a.phone}</td><td>${a.membership_packages?.name||""}</td><td>${statusLabel(a.status)}</td><td>${(a.status==="booked"||a.status==="confirmed")?`<button class="btn danger" onclick="changeAppointmentStatus('${a.id}','cancelled')">CANCELAR</button>`:""}</td></tr>`).join("")}</table></div>`:`<div class="card"><p class="muted">Nenhum agendamento de pacote para este dia.</p></div>`;
+ $("pkgAgendaContent").innerHTML=rows.length?`<div class="tablewrap"><table class="table"><tr><th>Horário</th><th>Cliente</th><th>WhatsApp</th><th>Pacote</th><th>Status</th><th>Pagamento</th><th>Ações</th></tr>${rows.map(a=>`<tr><td>${String(a.time).slice(0,5)}</td><td>${a.client_name}</td><td>${a.phone}</td><td>${a.membership_packages?.name||""}</td><td>${statusLabel(a.status)}</td><td class="${a.package_paid?"positive":"negative"}">${a.package_paid?"Pago":"Pendente"}</td><td>${!a.package_paid?`<button class="btn" onclick="confirmPackagePayment('${a.id}',${a.membership_packages?.price||0},'${(a.membership_packages?.name||"").replace(/'/g,"\\'")}','${(a.client_name||"").replace(/'/g,"\\'")}')">CONFIRMAR PAGAMENTO</button> `:""}${(a.status==="booked"||a.status==="confirmed")?`<button class="btn danger" onclick="changeAppointmentStatus('${a.id}','cancelled')">CANCELAR</button>`:""}</td></tr>`).join("")}</table></div>`:`<div class="card"><p class="muted">Nenhum agendamento de pacote para este dia.</p></div>`;
+}
+async function confirmPackagePayment(id,price,packageName,clientName){
+ if(!confirm(`Confirmar recebimento de ${money(price)} via PIX referente a "${packageName}"?`))return;
+ const entry=await db.from("financial_transactions").insert({type:"income",category:"Pacotes",description:`Pacote confirmado: ${packageName} — ${clientName}`,amount:Number(price),transaction_date:localDate()});
+ if(entry.error)return alert("Não foi possível lançar no financeiro: "+entry.error.message);
+ const upd=await db.from("appointments").update({package_paid:true}).eq("id",id);
+ if(upd.error)return alert("O lançamento foi salvo, mas não foi possível marcar como pago: "+upd.error.message);
+ await loadFinancialBalance();
+ await loadPackageAgenda();
 }
 async function saveFinancialTransaction(e){
  e.preventDefault();
@@ -475,6 +545,14 @@ async function saveAccount(e){
  alert("Dados atualizados. Alterações de e-mail podem exigir confirmação enviada pelo Supabase.");
  showPanel("account");
 }
+async function savePixSettings(e){
+ e.preventDefault();
+ const r=await db.from("business_settings").update({pix_key:$("pixKey").value.trim(),pix_receiver_name:$("pixReceiverName").value.trim(),pix_city:$("pixCity").value.trim(),updated_at:new Date().toISOString()}).eq("id",true);
+ if(r.error)return alert("Não foi possível salvar a chave PIX: "+r.error.message);
+ await loadBusinessSettings();
+ alert("Chave PIX salva!");
+ showPanel("account");
+}
 async function uploadPhotos(){
  const files=[...$("photoFiles").files];if(!files.length)return alert("Escolha pelo menos uma foto.");
  for(const f of files){const path=`${crypto.randomUUID()}-${f.name.replace(/[^a-zA-Z0-9._-]/g,"_")}`;const up=await db.storage.from("barbearia-fotos").upload(path,f);if(up.error){alert(up.error.message);continue}const u=db.storage.from("barbearia-fotos").getPublicUrl(path);await db.from("photos").insert({url:u.data.publicUrl,caption:"Corte",active:true})}
@@ -503,6 +581,6 @@ async function changeAppointmentStatus(id,status){
  await loadAgenda();await loadTimes();
  if($("pkgAgendaContent"))await loadPackageAgenda();
 }
-refreshBookingDate();loadServices();loadPackages();loadPhotos();loadTimes();
+refreshBookingDate();loadServices();loadPackages();loadPhotos();loadTimes();loadBusinessSettings();
 </script>
 </body></html>
