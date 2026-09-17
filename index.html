@@ -13,7 +13,9 @@ body{margin:0;padding-bottom:64px;background:var(--bg);color:var(--ink);font:17p
 a{text-decoration:none;color:inherit}
 .container{width:min(1100px,92%);margin:auto}
 header{position:sticky;top:0;z-index:10;background:#f4eee1f2;border-bottom:2px solid var(--green);backdrop-filter:blur(6px)}
-.nav{height:74px;display:flex;align-items:center;justify-content:space-between}
+.nav{height:74px;display:flex;align-items:center;justify-content:space-between;position:relative}
+.nav-toggle{display:none;background:none;border:1px solid var(--line);color:var(--ink);font-size:19px;line-height:1;padding:8px 13px;border-radius:2px;cursor:pointer}
+.nav-toggle:hover{border-color:var(--green)}
 .logo{font-family:var(--display);font-weight:600;font-size:20px;letter-spacing:.04em;text-transform:uppercase}
 .logo b{color:var(--green);font-weight:700}
 nav{display:flex;gap:30px;font-family:var(--display);font-size:13px;letter-spacing:.06em;text-transform:uppercase}
@@ -80,12 +82,18 @@ footer{position:fixed;bottom:0;left:0;width:100%;height:64px;z-index:999;display
 .modal-overlay.open{display:flex}
 .modal-box{max-width:420px;width:100%;background:var(--card);border:1px solid var(--line);border-top:3px solid var(--green);padding:26px;position:relative}
 .modal-close{position:absolute;top:10px;right:14px;background:none;border:0;color:var(--ink);font-size:24px;cursor:pointer;line-height:1}
-@media(max-width:750px){nav{display:none}.grid,.gallery,.stats,.finance-summary{grid-template-columns:1fr}.hero{min-height:480px}.hero .container{padding:40px 20px}section{padding:56px 0}}
+@media(max-width:750px){
+.nav-toggle{display:block}
+nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg);border:1px solid var(--line);border-top:2px solid var(--green);flex-direction:column;gap:0;padding:6px 0}
+nav.open{display:flex}
+nav a{padding:15px 22px;border-bottom:1px solid var(--line)}
+.grid,.gallery,.stats,.finance-summary{grid-template-columns:1fr}.hero{min-height:480px}.hero .container{padding:40px 20px}section{padding:56px 0}}
 </style>
 </head>
 <body>
 <header><div class="container nav"><div class="logo">BARBEARIA <b>FAGUNDES</b></div>
-<nav><a href="#servicos">Serviços</a><a href="#pacotes">Pacotes</a><a href="#fotos">Fotos</a><a href="#agenda">Agendar</a><a href="#admin">Barbeiro</a></nav></div></header>
+<button id="navToggle" class="nav-toggle" onclick="toggleMobileNav()" aria-label="Abrir menu" aria-expanded="false">☰</button>
+<nav id="mainNav"><a href="#servicos">Serviços</a><a href="#pacotes">Pacotes</a><a href="#fotos">Fotos</a><a href="#agenda">Agendar</a><a href="#admin">Barbeiro</a></nav></div></header>
 
 <main id="site"><section class="hero"><div class="container"><h1>Seu estilo começa aqui.</h1><p>Agende seu corte online, veja nossos trabalhos e escolha o melhor horário para você.</p><a class="btn" href="#agenda">Agendar horário</a></div></section>
 
@@ -165,6 +173,19 @@ let financialMonth="";
 let selectedPackage=null;
 let businessSettings={};
 const $=id=>document.getElementById(id);
+function toggleMobileNav(){
+ const nav=$("mainNav"),btn=$("navToggle");
+ const open=nav.classList.toggle("open");
+ btn.setAttribute("aria-expanded",open?"true":"false");
+ btn.textContent=open?"✕":"☰";
+}
+$("mainNav").addEventListener("click",e=>{
+ if(e.target.tagName==="A"){
+  $("mainNav").classList.remove("open");
+  $("navToggle").textContent="☰";
+  $("navToggle").setAttribute("aria-expanded","false");
+ }
+});
 function pixSanitize(s){return (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase().replace(/[^A-Z0-9 ]/g,"").trim()}
 function crc16(str){
  let crc=0xFFFF;
