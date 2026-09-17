@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Barbearia Fagundes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4eee1;--bg-deep:#ebe2cd;--card:#fffdf9;--green:#1f4d3d;--green-dark:#163a2e;--rust:#8a3324;--ink:#2a2420;--muted:#6b6155;--line:#d9cdb4;--display:'Oswald',Impact,sans-serif;--serif:'Lora',Georgia,serif}
+*{box-sizing:border-box}
+body{margin:0;padding-bottom:64px;background:var(--bg);color:var(--ink);font:17px/1.65 var(--serif)}
+a{text-decoration:none;color:inherit}
+.container{width:min(1100px,92%);margin:auto}
+header{position:sticky;top:0;z-index:10;background:#f4eee1f2;border-bottom:2px solid var(--green);backdrop-filter:blur(6px)}
+.nav{height:74px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:var(--display);font-weight:600;font-size:20px;letter-spacing:.04em;text-transform:uppercase}
+.logo b{color:var(--green);font-weight:700}
+nav{display:flex;gap:30px;font-family:var(--display);font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+nav a:hover{color:var(--green)}
+
+.hero{min-height:560px;display:flex;align-items:center;justify-content:center;text-align:center;padding:100px 0;position:relative;background:var(--bg-deep)}
+.hero .container{max-width:680px;border-top:3px double var(--green);border-bottom:3px double var(--green);padding:56px 24px}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(38px,6.4vw,60px);line-height:1.08;margin:0 0 18px;text-transform:uppercase;letter-spacing:.01em}
+.hero p{font-family:var(--serif);font-style:italic;font-size:19px;color:var(--muted);max-width:480px;margin:0 auto 30px;line-height:1.6}
+@keyframes heroRise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.hero h1,.hero p,.hero .btn{animation:heroRise .7s ease-out both}
+.hero p{animation-delay:.1s}.hero .btn{animation-delay:.2s}
+@media(prefers-reduced-motion:reduce){.hero h1,.hero p,.hero .btn{animation:none}}
+
+.btn{border:2px solid var(--green);border-radius:2px;padding:13px 26px;background:var(--green);color:#f4eee1;font-family:var(--display);font-weight:600;font-size:13.5px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:.15s ease}
+.btn:hover{background:var(--green-dark);border-color:var(--green-dark)}
+.btn.alt{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.btn.alt:hover{border-color:var(--green);color:var(--green)}
+.btn.danger{background:var(--rust);border-color:var(--rust);color:#fff}
+
+section{padding:78px 0}
+.title{text-align:center;margin-bottom:44px}
+.title h2{font-family:var(--display);font-weight:600;font-size:30px;margin:0 0 10px;text-transform:uppercase;letter-spacing:.03em}
+.title::after{content:"";display:block;width:56px;height:2px;background:var(--green);margin:14px auto 0}
+.muted{color:var(--muted)}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.card{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--green);border-radius:2px;padding:26px}
+.card h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.02em;font-size:17px;margin:0 0 8px}
+.price{font-family:var(--display);font-size:24px;color:var(--green);font-weight:600;margin-top:16px}
+
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.gallery img{width:100%;aspect-ratio:1;object-fit:cover;border:1px solid var(--line);background:var(--card)}
+
+.booking{background:var(--bg-deep)}
+.box{max-width:640px;margin:auto;background:var(--card);padding:32px;border:1px solid var(--line);border-top:3px solid var(--green)}
+form{display:grid;gap:16px}
+label{font-family:var(--display);font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+input,select{width:100%;padding:13px;margin-top:7px;background:var(--bg);border:1px solid var(--line);border-radius:2px;color:var(--ink);font:15px var(--serif)}
+input:focus,select:focus{outline:2px solid var(--green);outline-offset:1px;border-color:var(--green)}
+.notice{padding:12px 14px;border-radius:2px;background:#e3ecdf;color:#2f5233;margin-bottom:14px;display:none;font-family:var(--serif);font-size:14px;border:1px solid #b9cfb4}
+.error{background:#f2ddd6;color:#7a2c1c;border-color:#dba392}
+#site{background:var(--bg)}
+footer{position:fixed;bottom:0;left:0;width:100%;height:64px;z-index:999;display:flex;align-items:center;justify-content:center;padding:0;margin:0;border-top:2px solid var(--green);background:var(--bg-deep);color:var(--muted);font-family:var(--display);font-size:12.5px;letter-spacing:.05em;text-transform:uppercase}
+#admin{}.adminbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px}
+.stat{background:var(--card);padding:20px;border:1px solid var(--line);border-top:3px solid var(--green)}
+.stat strong{font-family:var(--display);font-size:26px;color:var(--green);display:block;font-weight:600}
+.finance-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:12px;margin:20px 0}
+.finance-card{padding:18px;background:var(--bg-deep);border:1px solid var(--line)}
+.finance-card strong{font-family:var(--display);font-size:22px;display:block;margin-top:7px;font-weight:600}
+.positive{color:#2f6b3f}.negative{color:#9a3a26}
+.filterbar{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:18px 0}.filterbar label{min-width:190px}
+.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse}
+.table th{font-family:var(--display);color:var(--muted);font-weight:600;font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.table th,.table td{padding:13px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.hidden{display:none!important}
+
+.package-card{padding:0;overflow:hidden}
+.package-card img{width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--bg-deep)}
+.package-card .package-body{padding:24px}
+.package-period{font-family:var(--display);color:var(--green);font-weight:600;font-size:13px;letter-spacing:.03em;text-transform:uppercase;margin:12px 0 4px}
+.modal-overlay{display:none;position:fixed;inset:0;z-index:1000;background:#2a2420cc;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal-box{max-width:420px;width:100%;background:var(--card);border:1px solid var(--line);border-top:3px solid var(--green);padding:26px;position:relative}
+.modal-close{position:absolute;top:10px;right:14px;background:none;border:0;color:var(--ink);font-size:24px;cursor:pointer;line-height:1}
+@media(max-width:750px){nav{display:none}.grid,.gallery,.stats,.finance-summary{grid-template-columns:1fr}.hero{min-height:480px}.hero .container{padding:40px 20px}section{padding:56px 0}}
+</style>
+</head>
+<body>
+<header><div class="container nav"><div class="logo">BARBEARIA <b>FAGUNDES</b></div>
+<nav><a href="#servicos">Serviços</a><a href="#pacotes">Pacotes</a><a href="#fotos">Fotos</a><a href="#agenda">Agendar</a><a href="#admin">Barbeiro</a></nav></div></header>
+
+<main id="site"><section class="hero"><div class="container"><h1>Seu estilo começa aqui.</h1><p>Agende seu corte online, veja nossos trabalhos e escolha o melhor horário para você.</p><a class="btn" href="#agenda">Agendar horário</a></div></section>
+
+<section id="servicos"><div class="container"><div class="title"><h2>Serviços e preços</h2><p class="muted">Valores atualizados pelo painel do barbeiro.</p></div><div id="serviceCards" class="grid"></div></div></section>
+<section id="pacotes"><div class="container"><div class="title"><h2>Pacotes e assinaturas</h2><p class="muted">Planos pensados para você cuidar do visual todos os meses.</p></div><div id="packageCards" class="grid"></div></div></section>
+
+<section id="fotos"><div class="container"><div class="title"><h2>Nossos trabalhos</h2><p class="muted">Fotos reais dos cortes realizados.</p></div><div id="gallery" class="gallery"></div></div></section>
+
+<section id="agenda" class="booking"><div class="container"><div class="title"><h2>Agende seu horário</h2><p class="muted">Escolha o serviço, dia e horário.</p></div><div class="box">
+<div id="notice" class="notice"></div>
+<form id="bookingForm">
+<label>Nome<input id="name" required placeholder="Seu nome"></label>
+<label>WhatsApp<input id="phone" required placeholder="(00) 00000-0000"></label>
+<label>Serviço<select id="service" required></select></label>
+<label>Dia<input type="date" id="date" required></label>
+<label>Horário<select id="time" required></select></label>
+<button class="btn">Confirmar agendamento</button>
+</form></div></div></section>
+</main>
+
+<!-- MODAL DE AGENDAMENTO DE PACOTE -->
+<div id="packageModalOverlay" class="modal-overlay">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closePackageModal()" aria-label="Fechar">&times;</button>
+    <h3>Agendar: <span id="packageModalName"></span></h3>
+    <div id="packageNotice" class="notice"></div>
+    <form id="packageBookingForm">
+      <label>Nome<input id="pkgName" required placeholder="Seu nome"></label>
+      <label>WhatsApp<input id="pkgPhone" required placeholder="(00) 00000-0000"></label>
+      <label>Dia<input type="date" id="pkgDate" required></label>
+      <label>Horário<select id="pkgTime" required></select></label>
+      <button class="btn">CONFIRMAR AGENDAMENTO DO PACOTE</button>
+    </form>
+    <div id="pixPaymentBox" class="hidden">
+      <p class="muted">Agendamento confirmado! Para garantir sua vaga, finalize o pagamento do pacote via PIX:</p>
+      <p style="text-align:center;margin:14px 0"><strong id="pixAmount" style="color:var(--green);font-size:22px;font-family:var(--display)"></strong></p>
+      <div id="pixQr" style="display:flex;justify-content:center;background:#fff;padding:10px;border-radius:10px;width:fit-content;margin:auto"></div>
+      <label style="margin-top:16px">Chave PIX<input id="pixKeyDisplay" readonly></label>
+      <button type="button" class="btn alt" style="margin-top:10px" onclick="copyPixKey(event)">COPIAR CHAVE PIX</button>
+      <button type="button" class="btn" style="margin-top:10px" onclick="closePackageModal()">JÁ PAGUEI / FECHAR</button>
+    </div>
+  </div>
+</div>
+
+<section id="admin"><div class="container"><div class="title"><h2>Painel do barbeiro</h2><p class="muted">Área administrativa</p></div>
+<div id="loginBox" class="box"><form id="login"><label>E-mail<input id="email" type="email" required></label><label>Senha<input id="password" type="password" required></label><button class="btn">Entrar</button></form></div>
+<div id="dashboard" class="hidden">
+<div class="adminbar">
+<button class="btn alt" onclick="showPanel('appointments')">Agenda</button>
+<button class="btn alt" onclick="showPanel('packageBookings')">Agenda de Pacotes</button>
+<button class="btn alt" onclick="showPanel('clients')">Clientes</button>
+<button class="btn alt" onclick="showPanel('hours')">Horários</button>
+<button class="btn alt" onclick="showPanel('services')">Serviços / Preços</button>
+<button class="btn alt" onclick="showPanel('packages')">Pacotes / Assinaturas</button>
+<button class="btn alt" onclick="showPanel('photos')">Fotos</button>
+<button class="btn alt" onclick="showPanel('finance')">Financeiro</button>
+<button class="btn alt" onclick="showPanel('account')">Minha conta</button>
+<button class="btn" onclick="logout()">Sair</button></div>
+<div class="stats"><div class="stat">Agendamentos<strong id="statAppointments">0</strong></div><div class="stat">Clientes<strong id="statClients">0</strong></div><div class="stat">Serviços<strong id="statServices">0</strong></div><div class="stat">Horários<strong id="statHours">0</strong></div><div class="stat">Cortes no mês<strong id="statCuts">0</strong></div><div class="stat">Saldo do mês<strong id="statBalance">R$ 0,00</strong></div></div>
+<div id="panel"></div></div></div></section>
+<footer>© 2026 Barbearia Fagundes</footer>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+const C=window.BARBEARIA_CONFIG||{};
+const connected=C.SUPABASE_URL&&C.SUPABASE_ANON_KEY&&!C.SUPABASE_URL.includes("COLOQUE");
+const db=connected?supabase.createClient(C.SUPABASE_URL,C.SUPABASE_ANON_KEY):null;
+let services=[];
+const fallback=[{id:"1",name:"Corte Masculino",description:"Máquina, tesoura e acabamento.",price:35,active:true},{id:"2",name:"Corte + Barba",description:"Visual completo com acabamento.",price:55,active:true},{id:"3",name:"Barba",description:"Modelagem e acabamento.",price:25,active:true}];
+const fallbackTimes=["09:00","09:30","10:00","10:30","11:00","11:30","13:00","13:30","14:00","14:30","15:00","15:30","16:00","16:30","17:00","17:30","18:00","18:30"];
+let times=[...fallbackTimes];
+let agendaFollowingToday=true;
+let agendaTimer=null;
+let financialMonth="";
+let selectedPackage=null;
+let businessSettings={};
+const $=id=>document.getElementById(id);
+function pixSanitize(s){return (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase().replace(/[^A-Z0-9 ]/g,"").trim()}
+function crc16(str){
+ let crc=0xFFFF;
+ for(let i=0;i<str.length;i++){
+  crc^=str.charCodeAt(i)<<8;
+  for(let j=0;j<8;j++){
+   crc=(crc&0x8000)!==0?((crc<<1)^0x1021)&0xFFFF:(crc<<1)&0xFFFF;
+  }
+ }
+ return crc.toString(16).toUpperCase().padStart(4,"0");
+}
+function tlv(id,value){return id+String(value.length).padStart(2,"0")+value}
+function buildPixPayload(key,name,city,amount){
+ let payload=tlv("00","01");
+ payload+=tlv("26",tlv("00","br.gov.bcb.pix")+tlv("01",key));
+ payload+=tlv("52","0000");
+ payload+=tlv("53","986");
+ if(amount)payload+=tlv("54",Number(amount).toFixed(2));
+ payload+=tlv("58","BR");
+ payload+=tlv("59",pixSanitize(name||"BARBEARIA FAGUNDES").substring(0,25)||"BARBEARIA FAGUNDES");
+ payload+=tlv("60",pixSanitize(city||"SAO PAULO").substring(0,15)||"SAO PAULO");
+ payload+=tlv("62",tlv("05","***"));
+ payload+="6304";
+ return payload+crc16(payload);
+}
+async function loadBusinessSettings(){
+ if(!db)return;
+ const r=await db.from("business_settings").select("*").eq("id",true).maybeSingle();
+ if(!r.error&&r.data)businessSettings=r.data;
+}
+function copyPixKey(e){
+ const el=$("pixKeyDisplay");
+ el.select();
+ navigator.clipboard?.writeText(el.value);
+ const b=e?.target;
+ if(b){const old=b.textContent;b.textContent="COPIADO!";setTimeout(()=>b.textContent=old,1500)}
+}
+function msg(t,e=false){$("notice").textContent=t;$("notice").className="notice"+(e?" error":"");$("notice").style.display="block";setTimeout(()=>$("notice").style.display="none",5000)}
+function money(v){return "R$ "+Number(v).toFixed(2).replace(".",",")}
+function localDate(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10)}
+function monthKey(){return localDate().slice(0,7)}
+function monthTitle(){return new Date(localDate()+"T12:00:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"})}
+function statusLabel(status){return {booked:"Agendado",confirmed:"Confirmado",completed:"Concluído",cancelled:"Cancelado"}[status]||status}
+function refreshBookingDate(){
+ const date=$("date"),today=localDate();
+ date.min=today;
+ if(date.value&&date.value<today){date.value="";fillTimes([])}
+}
+function startAgendaUpdates(){
+ if(agendaTimer)return;
+ agendaTimer=setInterval(async()=>{
+ refreshBookingDate();
+  const agendaDate=$("agendaDate");
+  if(agendaDate){
+   if(agendaFollowingToday&&agendaDate.value!==localDate())agendaDate.value=localDate();
+   if(agendaFollowingToday)await loadAgenda();
+  }
+  if(financialMonth&&financialMonth!==monthKey()){
+   await loadFinancialBalance();
+   if($("financeForm"))showPanel("finance");
+  }
+ },60000);
+}
+function viewAgendaDate(){agendaFollowingToday=false;loadAgenda()}
+function returnToToday(){agendaFollowingToday=true;$("agendaDate").value=localDate();loadAgenda()}
+async function loadServices(){
+ if(db){const r=await db.from("services").select("*").eq("active",true).order("created_at");if(!r.error)services=r.data||[]}
+ if(!services.length)services=fallback;
+ $("serviceCards").innerHTML=services.map(s=>`<div class="card"><h3>${s.name}</h3><p class="muted">${s.description||""}</p><div class="price">${money(s.price)}</div></div>`).join("");
+ $("service").innerHTML='<option value="">Selecione</option>'+services.map(s=>`<option value="${s.id}">${s.name} — ${money(s.price)}</option>`).join("");
+ $("statServices").textContent=services.length;
+}
+async function loadPackages(){
+ let rows=[];
+ if(db){const r=await db.from("membership_packages").select("*").eq("active",true).order("created_at");if(!r.error)rows=r.data||[]}
+ $("packageCards").innerHTML=rows.length?rows.map(p=>`<div class="card package-card">${p.image_url?`<img src="${p.image_url}" alt="${p.name}">`:""}<div class="package-body"><h3>${p.name}</h3><p class="muted">${p.description||""}</p><div class="package-period">${p.period||"por mês"}</div><div class="price">${money(p.price)}</div><br><button type="button" class="btn pacote-btn" data-pid="${p.id}" data-pname="${(p.name||"").replace(/"/g,"&quot;")}" data-pprice="${p.price}">QUERO ESTE PACOTE</button></div></div>`).join(""):`<div class="card"><p class="muted">Em breve teremos pacotes e assinaturas disponíveis.</p></div>`;
+}
+async function loadPhotos(){
+ let data=[];
+ if(db){const r=await db.from("photos").select("*").eq("active",true).order("created_at",{ascending:false});if(!r.error)data=r.data||[]}
+ $("gallery").innerHTML=data.length?data.map(p=>`<img src="${p.url}" alt="${p.caption||"Corte"}">`).join(""):`<div class="card"><p class="muted">Ainda não há fotos cadastradas.</p></div>`;
+}
+function fillTimes(disabled=[]){$("time").innerHTML="";times.forEach(t=>{let o=document.createElement("option");o.value=t;o.textContent=t;o.disabled=disabled.includes(t);$("time").appendChild(o)})}
+async function loadTimes(){
+ let booked=[];
+ let available=[...fallbackTimes];
+ if(db&&$("date").value){
+   const d=new Date($("date").value+"T12:00:00");
+   const weekday=d.getDay();
+   const hr=await db.from("business_hours").select("open_time,close_time,active").eq("weekday",weekday).eq("active",true).maybeSingle();
+   if(!hr.error && hr.data){
+     const [oh,om]=String(hr.data.open_time).slice(0,5).split(":").map(Number);
+     const [ch,cm]=String(hr.data.close_time).slice(0,5).split(":").map(Number);
+     const from=oh*60+om,to=ch*60+cm;
+     available=[];
+     for(let m=from;m<=to;m+=30) available.push(String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0"));
+   }else if(!hr.error && !hr.data){available=[]}
+   const r=await db.from("appointments").select("time").eq("date",$("date").value).neq("status","cancelled");
+   if(!r.error)booked=(r.data||[]).map(x=>String(x.time).slice(0,5))
+   if($("date").value===localDate()){
+     const now=new Date(),minutes=now.getHours()*60+now.getMinutes();
+     booked=booked.concat(available.filter(t=>{const [h,m]=t.split(":").map(Number);return h*60+m<=minutes}));
+   }
+ }
+ times=available;
+ fillTimes(booked);
+
+}
+$("bookingForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ if(!db){msg("O site ainda não está conectado ao banco online.",true);return}
+ const sid=$("service").value,s=services.find(x=>String(x.id)===String(sid));
+ const b={client_name:$("name").value.trim(),phone:$("phone").value.trim(),service_id:sid,date:$("date").value,time:$("time").value,status:"booked"};
+ const r=await db.from("appointments").insert(b);
+ if(r.error){
+   console.error("Supabase appointment error:",r.error);
+   if(r.error.code==="23505") msg("Esse horário já foi reservado. Escolha outro.",true);
+   else msg("Não foi possível salvar o agendamento: "+(r.error.message||"erro desconhecido"),true);
+   await loadTimes();return;
+ }
+ const cr=await db.from("clients").upsert({name:b.client_name,phone:b.phone},{onConflict:"phone"});
+ if(cr.error) console.warn("Client save error:",cr.error);
+ msg("Agendamento confirmado!");
+ const text=encodeURIComponent(`Olá! Gostaria de confirmar meu agendamento na Barbearia Fagundes.\nNome: ${b.client_name}\nServiço: ${s?.name}\nData: ${b.date.split("-").reverse().join("/")}\nHorário: ${b.time}`);
+ e.target.reset();await loadTimes();
+ if(C.WHATSAPP_NUMBER)setTimeout(()=>window.open(`https://wa.me/${C.WHATSAPP_NUMBER}?text=${text}`,"_blank"),600);
+});
+$("date").addEventListener("change",loadTimes);
+
+/* ===== AGENDAMENTO DE PACOTE (modal) ===== */
+function openPackageModal(id,name,price){
+ selectedPackage={id,name,price:Number(price)};
+ $("packageModalName").textContent=name;
+ $("packageBookingForm").reset();
+ $("packageBookingForm").classList.remove("hidden");
+ $("pixPaymentBox").classList.add("hidden");
+ $("packageNotice").style.display="none";
+ $("pkgDate").min=localDate();
+ fillPackageTimes();
+ $("packageModalOverlay").classList.add("open");
+}
+function closePackageModal(){
+ $("packageModalOverlay").classList.remove("open");
+ selectedPackage=null;
+}
+function fillPackageTimes(disabled=[]){$("pkgTime").innerHTML="";times.forEach(t=>{let o=document.createElement("option");o.value=t;o.textContent=t;o.disabled=disabled.includes(t);$("pkgTime").appendChild(o)})}
+async function loadPackageTimes(){
+ let booked=[];
+ if(db&&$("pkgDate").value){
+   const r=await db.from("appointments").select("time").eq("date",$("pkgDate").value).neq("status","cancelled");
+   if(!r.error)booked=(r.data||[]).map(x=>String(x.time).slice(0,5));
+   if($("pkgDate").value===localDate()){
+     const now=new Date(),minutes=now.getHours()*60+now.getMinutes();
+     booked=booked.concat(times.filter(t=>{const [h,m]=t.split(":").map(Number);return h*60+m<=minutes}));
+   }
+ }
+ fillPackageTimes(booked);
+}
+$("pkgDate").addEventListener("change",loadPackageTimes);
+document.addEventListener("click",e=>{
+ const btn=e.target.closest(".pacote-btn");
+ if(btn)openPackageModal(btn.dataset.pid,btn.dataset.pname,btn.dataset.pprice);
+});
+$("packageBookingForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ if(!db){$("packageNotice").className="notice error";$("packageNotice").style.display="block";$("packageNotice").textContent="O site ainda não está conectado ao banco online.";return}
+ if(!selectedPackage){closePackageModal();return}
+ const b={client_name:$("pkgName").value.trim(),phone:$("pkgPhone").value.trim(),package_id:selectedPackage.id,service_id:null,date:$("pkgDate").value,time:$("pkgTime").value,status:"booked"};
+ const r=await db.from("appointments").insert(b);
+ if(r.error){
+   console.error("Supabase package appointment error:",r.error);
+   $("packageNotice").className="notice error";
+   $("packageNotice").style.display="block";
+   $("packageNotice").textContent=r.error.code==="23505"?"Esse horário já foi reservado. Escolha outro.":"Não foi possível salvar: "+(r.error.message||"erro desconhecido");
+   await loadPackageTimes();
+   return;
+ }
+ const cr=await db.from("clients").upsert({name:b.client_name,phone:b.phone},{onConflict:"phone"});
+ if(cr.error)console.warn("Client save error:",cr.error);
+ const text=encodeURIComponent(`Olá! Gostaria de confirmar meu agendamento do pacote na Barbearia Fagundes.\nNome: ${b.client_name}\nPacote: ${selectedPackage.name}\nData: ${b.date.split("-").reverse().join("/")}\nHorário: ${b.time}`);
+ if(C.WHATSAPP_NUMBER)setTimeout(()=>window.open(`https://wa.me/${C.WHATSAPP_NUMBER}?text=${text}`,"_blank"),600);
+ if(businessSettings.pix_key){
+  $("packageBookingForm").classList.add("hidden");
+  $("pixAmount").textContent=money(selectedPackage.price);
+  $("pixKeyDisplay").value=businessSettings.pix_key;
+  $("pixQr").innerHTML="";
+  const payload=buildPixPayload(businessSettings.pix_key,businessSettings.pix_receiver_name,businessSettings.pix_city,selectedPackage.price);
+  new QRCode($("pixQr"),{text:payload,width:180,height:180});
+  $("pixPaymentBox").classList.remove("hidden");
+ }else{
+  $("packageNotice").className="notice";
+  $("packageNotice").style.display="block";
+  $("packageNotice").textContent="Agendamento do pacote confirmado! O barbeiro ainda não cadastrou uma chave PIX, então o pagamento pode ser combinado diretamente.";
+  setTimeout(closePackageModal,2200);
+ }
+});
+
+async function login(e){
+ e.preventDefault();if(!db)return alert("O site ainda não está conectado. Preencha config.js.");
+ const r=await db.auth.signInWithPassword({email:$("email").value,password:$("password").value});
+ if(r.error)return alert(r.error.message);$("loginBox").classList.add("hidden");$("dashboard").classList.remove("hidden");startAgendaUpdates();await loadFinancialBalance();showPanel("appointments");
+}
+$("login").addEventListener("submit",login);
+async function logout(){if(db)await db.auth.signOut();location.reload()}
+
+async function showPanel(type){
+ const p=$("panel");
+ if(type==="appointments"){
+  const today=localDate();
+  agendaFollowingToday=true;
+  p.innerHTML=`<h3>Agenda</h3><p class="muted">Exibindo o dia atual e atualizando automaticamente. Escolha outra data para consultar dias anteriores ou futuros.</p><div class="filterbar"><label>Escolha o dia<input type="date" id="agendaDate" value="${today}" onchange="viewAgendaDate()"></label><button class="btn alt" onclick="viewAgendaDate()">VER AGENDA</button><button class="btn alt" onclick="returnToToday()">VOLTAR PARA HOJE</button></div><div id="agendaContent"></div>`;
+  await loadAgenda();
+  return;
+ }
+ if(type==="packageBookings"){
+  const today=localDate();
+  p.innerHTML=`<h3>Agenda de Pacotes</h3><p class="muted">Agendamentos feitos a partir da página de Pacotes e Assinaturas — não aparecem na aba Agenda, que é só de cortes avulsos.</p><div class="filterbar"><label>Escolha o dia<input type="date" id="pkgAgendaDate" value="${today}" onchange="loadPackageAgenda()"></label></div><div id="pkgAgendaContent"></div>`;
+  await loadPackageAgenda();
+  return;
+ }
+ if(type==="finance"){
+  const r=await db.from("financial_transactions").select("*").order("transaction_date",{ascending:false}).order("created_at",{ascending:false});
+  if(r.error){p.innerHTML=`<h3>Financeiro</h3><div class="card"><p class="muted">Ainda falta criar a tabela financeira no Supabase. Execute o arquivo <b>finance.sql</b> no SQL Editor e abra esta tela novamente.</p></div>`;return}
+  const rows=r.data||[];
+  const selectedMonth=window.selectedReportMonth||monthKey();
+  const monthRows=rows.filter(x=>String(x.transaction_date).startsWith(selectedMonth));
+  const income=monthRows.filter(x=>x.type==="income").reduce((sum,x)=>sum+Number(x.amount),0);
+  const expense=monthRows.filter(x=>x.type==="expense").reduce((sum,x)=>sum+Number(x.amount),0);
+  const cuts=monthRows.filter(x=>x.type==="income"&&x.appointment_id).length;
+  const byCategory={};monthRows.filter(x=>x.type==="expense").forEach(x=>byCategory[x.category]=(byCategory[x.category]||0)+Number(x.amount));
+  const categories=Object.entries(byCategory).sort((a,b)=>b[1]-a[1]);
+  p.innerHTML=`<h3>Financeiro — ${new Date(selectedMonth+"-01T12:00:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"})}</h3><div class="filterbar"><label>Mês do relatório<input type="month" id="reportMonth" value="${selectedMonth}"></label><button class="btn alt" type="button" onclick="changeReportMonth()">VER RELATÓRIO</button></div><p class="muted">Os números abaixo são do mês atual. Quando o próximo mês começar, cortes e saldo voltam a zero automaticamente, sem apagar o histórico.</p><div class="finance-summary"><div class="finance-card"><span class="muted">Cortes confirmados</span><strong>${cuts}</strong></div><div class="finance-card"><span class="muted">Entradas</span><strong class="positive">${money(income)}</strong></div><div class="finance-card"><span class="muted">Saídas</span><strong class="negative">${money(expense)}</strong></div><div class="finance-card"><span class="muted">Saldo do mês</span><strong class="${income-expense>=0?"positive":"negative"}">${money(income-expense)}</strong></div></div><div class="card"><h3>Novo lançamento</h3><form id="financeForm"><label>Tipo<select id="ftype" required><option value="income">Entrada</option><option value="expense">Saída</option></select></label><label>Categoria<select id="fcategory" required><option>Serviços</option><option>Produtos</option><option>Aluguel</option><option>Contas</option><option>Fornecedores</option><option>Marketing</option><option>Equipamentos</option><option>Pró-labore</option><option>Outros</option></select></label><label>Descrição<input id="fdescription" maxlength="160" placeholder="Ex.: compra de lâminas"></label><label>Valor<input id="famount" type="number" min="0.01" step="0.01" required placeholder="0,00"></label><label>Data<input id="fdate" type="date" value="${localDate()}" required></label><button class="btn">SALVAR LANÇAMENTO</button></form></div><h3>Para onde o dinheiro está saindo neste mês</h3>${categories.length?`<div class="tablewrap"><table class="table"><tr><th>Categoria</th><th>Total gasto</th></tr>${categories.map(([name,value])=>`<tr><td>${name}</td><td class="negative">${money(value)}</td></tr>`).join("")}</table></div>`:`<p class="muted">Nenhuma saída registrada neste mês.</p>`}<h3>Histórico deste mês</h3>${monthRows.length?`<div class="tablewrap"><table class="table"><tr><th>Data</th><th>Tipo</th><th>Categoria</th><th>Descrição</th><th>Valor</th></tr>${monthRows.map(x=>`<tr><td>${String(x.transaction_date).split("-").reverse().join("/")}</td><td class="${x.type==="income"?"positive":"negative"}">${x.type==="income"?"Entrada":"Saída"}</td><td>${x.category}</td><td>${x.description||"—"}</td><td>${money(x.amount)}</td></tr>`).join("")}</table></div>`:`<p class="muted">Nenhum lançamento registrado neste mês.</p>`}<div class="card"><h3>Limpeza temporária</h3><p class="muted">Use somente para reiniciar o sistema agora. Isso apaga todos os lançamentos financeiros e todos os agendamentos, sem possibilidade de recuperação. Clientes, serviços, fotos e dados de acesso não serão apagados.</p><button class="btn danger" onclick="resetTemporaryData()">ZERAR SALDO E APAGAR AGENDAMENTOS</button></div>`;
+  $("financeForm").onsubmit=saveFinancialTransaction;
+  return;
+ }
+ if(type==="account"){
+  const {data:{user}}=await db.auth.getUser();
+  await loadBusinessSettings();
+  p.innerHTML=`<h3>Minha conta</h3><div class="card"><p class="muted">E-mail atual: ${user?.email||"—"}</p><p class="muted">Use esta tela depois do primeiro acesso para definir seus próprios dados de login.</p><form id="accountForm"><label>Novo e-mail<input id="accountEmail" type="email" value="${user?.email||""}" required></label><label>Senha atual<input id="currentPassword" type="password" required autocomplete="current-password"></label><label>Nova senha<input id="newPassword" type="password" minlength="8" placeholder="Mínimo de 8 caracteres" autocomplete="new-password"></label><label>Confirmar nova senha<input id="confirmPassword" type="password" minlength="8" autocomplete="new-password"></label><button class="btn">SALVAR DADOS DE ACESSO</button></form></div><div class="card" style="margin-top:18px"><h3>Chave PIX para pagamento dos pacotes</h3><p class="muted">Essa chave e esse nome aparecem no QR code que os clientes usam para pagar um pacote pelo site.</p><form id="pixForm"><label>Chave PIX (CPF, CNPJ, e-mail, telefone ou aleatória)<input id="pixKey" value="${businessSettings.pix_key||""}" required placeholder="Ex.: 00000000000"></label><label>Nome do recebedor<input id="pixReceiverName" value="${businessSettings.pix_receiver_name||""}" required placeholder="Ex.: Barbearia Fagundes" maxlength="25"></label><label>Cidade<input id="pixCity" value="${businessSettings.pix_city||""}" required placeholder="Ex.: Sao Paulo" maxlength="15"></label><button class="btn">SALVAR CHAVE PIX</button></form></div>`;
+  $("accountForm").onsubmit=saveAccount;
+  $("pixForm").onsubmit=savePixSettings;
+  return;
+ }
+ if(type==="clients"){
+  const r=await db.from("clients").select("*").order("created_at",{ascending:false});
+  const rows=r.data||[];
+  $("statClients").textContent=rows.length;
+  p.innerHTML=`<h3>Clientes</h3><p class="muted">Apague somente cadastros de teste. Os agendamentos antigos não serão apagados.</p><div class="tablewrap"><table class="table"><tr><th>Nome</th><th>WhatsApp</th><th>Ação</th></tr>${rows.map(c=>`<tr><td>${c.name}</td><td>${c.phone}</td><td><button class="btn danger" onclick="deleteClient('${c.id}','${encodeURIComponent(c.name)}')">APAGAR</button></td></tr>`).join("")}</table></div>`;
+  return;
+ }
+ if(type==="hours"){p.innerHTML=`<h3>Horários disponíveis</h3><p class="muted">Horários padrão:</p><p>${times.join(" • ")}</p><p class="muted">A configuração por dia da semana fica na tabela business_hours do banco. Podemos criar uma tela para isso na próxima versão.</p>`;$("statHours").textContent=times.length;return}
+ if(type==="services"){
+  const r=await db.from("services").select("*").order("created_at");
+  const rows=r.data||[];
+  p.innerHTML=`<h3>Serviços e preços</h3><p class="muted">Edite o serviço quando quiser. Apagar do site apenas o oculta para os clientes e preserva agendamentos antigos.</p><div class="card"><form id="newService"><input id="sn" placeholder="Nome" required><input id="sd" placeholder="Descrição"><input id="sp" type="number" step="0.01" placeholder="Preço" required><button class="btn">ADICIONAR</button></form></div><br><div class="tablewrap"><table class="table"><tr><th>Serviço</th><th>Preço</th><th>Ativo</th><th>Ações</th></tr>${rows.map(s=>`<tr><td>${s.name}</td><td>${money(s.price)}</td><td>${s.active?"Sim":"Não"}</td><td><button class="btn alt" onclick="editService('${s.id}')">EDITAR</button> ${s.active?`<button class="btn danger" onclick="deactivateService('${s.id}')">APAGAR DO SITE</button>`:`<button class="btn" onclick="activateService('${s.id}')">REATIVAR</button>`}</td></tr>`).join("")}</table></div>`;
+  $("newService").onsubmit=async e=>{e.preventDefault();const r=await db.from("services").insert({name:$("sn").value.trim(),description:$("sd").value.trim()||null,price:Number($("sp").value),active:true});if(r.error)alert(r.error.message);else{services=[];await loadServices();showPanel("services")}};
+  return;
+ }
+ if(type==="packages"){
+  const r=await db.from("membership_packages").select("*").order("created_at");
+  if(r.error){p.innerHTML=`<h3>Pacotes e assinaturas</h3><div class="card"><p class="muted">Ainda falta criar a tabela de pacotes no Supabase. Execute a atualização do arquivo <b>finance.sql</b> no SQL Editor.</p></div>`;return}
+  const rows=r.data||[];
+  p.innerHTML=`<h3>Pacotes e assinaturas</h3><p class="muted">Cadastre, edite, troque a foto ou oculte os pacotes exibidos aos clientes.</p><div class="card"><form id="newPackage"><input id="pn" placeholder="Nome do pacote" required><input id="pd" placeholder="Descrição"><input id="pp" type="number" step="0.01" placeholder="Preço" required><input id="pper" placeholder="Período (ex.: por mês)" value="por mês"><input id="purl" type="url" placeholder="Link da foto (opcional)"><label class="muted">Ou envie uma foto de demonstração <input id="pimage" type="file" accept="image/*"></label><button class="btn">ADICIONAR PACOTE</button></form></div><br><div class="tablewrap"><table class="table"><tr><th>Foto</th><th>Pacote</th><th>Preço</th><th>Status</th><th>Ações</th></tr>${rows.map(x=>`<tr><td>${x.image_url?`<img src="${x.image_url}" alt="${x.name}" style="width:56px;height:40px;object-fit:cover;border-radius:6px">`:"—"}</td><td>${x.name}<br><span class="muted">${x.period||"por mês"}</span></td><td>${money(x.price)}</td><td>${x.active?"Ativo":"Oculto"}</td><td><button class="btn alt" onclick="editMembershipPackage('${x.id}')">EDITAR</button> <button class="btn alt" onclick="changeMembershipPackageImage('${x.id}')">TROCAR FOTO</button> ${x.active?`<button class="btn danger" onclick="deactivateMembershipPackage('${x.id}')">OCULTAR</button>`:`<button class="btn" onclick="activateMembershipPackage('${x.id}')">REATIVAR</button>`}</td></tr>`).join("")}</table></div>`;
+  $("newPackage").onsubmit=saveMembershipPackage;
+  return;
+ }
+ if(type==="photos"){p.innerHTML=`<h3>Fotos</h3><p class="muted">Selecione fotos dos cortes e envie para a galeria.</p><input type="file" accept="image/*" multiple id="photoFiles"><br><br><button class="btn" onclick="uploadPhotos()">ENVIAR FOTOS</button>`;return}
+}
+async function loadAgenda(){
+ const date=$("agendaDate").value;if(!date)return;
+ const r=await db.from("appointments").select("*, services(name,price)").eq("date",date).not("service_id","is",null).order("time");const rows=r.data||[];
+ $("agendaContent").innerHTML=rows.length?`<div class="tablewrap"><table class="table"><tr><th>Horário</th><th>Cliente</th><th>WhatsApp</th><th>Serviço</th><th>Status</th><th>Ações</th></tr>${rows.map(a=>`<tr><td>${String(a.time).slice(0,5)}</td><td>${a.client_name}</td><td>${a.phone}</td><td>${a.services?.name||""}</td><td>${statusLabel(a.status)}</td><td>${a.status==="booked"?`<button class="btn" onclick="changeAppointmentStatus('${a.id}','confirmed')">CONFIRMAR</button> `:""}${a.status==="confirmed"?`<button class="btn alt" onclick="changeAppointmentStatus('${a.id}','completed')">CONCLUIR</button> `:""}${(a.status==="booked"||a.status==="confirmed")?`<button class="btn danger" onclick="changeAppointmentStatus('${a.id}','cancelled')">CANCELAR</button>`:""}</td></tr>`).join("")}</table></div>`:`<div class="card"><p class="muted">Nenhum corte agendado para este dia.</p></div>`;
+ $("statAppointments").textContent=rows.filter(x=>x.status!=="cancelled").length;
+}
+async function loadPackageAgenda(){
+ const date=$("pkgAgendaDate").value;if(!date)return;
+ const r=await db.from("appointments").select("*, membership_packages(name,price)").eq("date",date).not("package_id","is",null).order("time");
+ const rows=r.data||[];
+ $("pkgAgendaContent").innerHTML=rows.length?`<div class="tablewrap"><table class="table"><tr><th>Horário</th><th>Cliente</th><th>WhatsApp</th><th>Pacote</th><th>Status</th><th>Pagamento</th><th>Ações</th></tr>${rows.map(a=>`<tr><td>${String(a.time).slice(0,5)}</td><td>${a.client_name}</td><td>${a.phone}</td><td>${a.membership_packages?.name||""}</td><td>${statusLabel(a.status)}</td><td class="${a.package_paid?"positive":"negative"}">${a.package_paid?"Pago":"Pendente"}</td><td>${!a.package_paid?`<button class="btn" onclick="confirmPackagePayment('${a.id}',${a.membership_packages?.price||0},'${(a.membership_packages?.name||"").replace(/'/g,"\\'")}','${(a.client_name||"").replace(/'/g,"\\'")}')">CONFIRMAR PAGAMENTO</button> `:""}${(a.status==="booked"||a.status==="confirmed")?`<button class="btn danger" onclick="changeAppointmentStatus('${a.id}','cancelled')">CANCELAR</button>`:""}</td></tr>`).join("")}</table></div>`:`<div class="card"><p class="muted">Nenhum agendamento de pacote para este dia.</p></div>`;
+}
+async function confirmPackagePayment(id,price,packageName,clientName){
+ if(!confirm(`Confirmar recebimento de ${money(price)} via PIX referente a "${packageName}"?`))return;
+ const entry=await db.from("financial_transactions").insert({type:"income",category:"Pacotes",description:`Pacote confirmado: ${packageName} — ${clientName}`,amount:Number(price),transaction_date:localDate()});
+ if(entry.error)return alert("Não foi possível lançar no financeiro: "+entry.error.message);
+ const upd=await db.from("appointments").update({package_paid:true}).eq("id",id);
+ if(upd.error)return alert("O lançamento foi salvo, mas não foi possível marcar como pago: "+upd.error.message);
+ await loadFinancialBalance();
+ await loadPackageAgenda();
+}
+async function saveFinancialTransaction(e){
+ e.preventDefault();
+ const item={type:$("ftype").value,category:$("fcategory").value,description:$("fdescription").value.trim()||null,amount:Number($("famount").value),transaction_date:$("fdate").value};
+ const r=await db.from("financial_transactions").insert(item);
+ if(r.error)return alert("Não foi possível salvar: "+r.error.message);
+ await loadFinancialBalance();showPanel("finance");
+}
+function changeReportMonth(){
+  const input=$("reportMonth");
+
+  if(!input.value){
+    return alert("Escolha um mês para gerar o relatório.");
+  }
+
+  window.selectedReportMonth=input.value;
+  showPanel("finance");
+}
+async function loadFinancialBalance(){
+ const r=await db.from("financial_transactions").select("type,amount,transaction_date,appointment_id");
+ financialMonth=monthKey();
+ if(r.error){$("statBalance").textContent="—";$("statCuts").textContent="—";return}
+ const monthRows=(r.data||[]).filter(x=>String(x.transaction_date).startsWith(financialMonth));
+ const balance=monthRows.reduce((sum,x)=>sum+(x.type==="income"?1:-1)*Number(x.amount),0);
+ $("statBalance").textContent=money(balance);
+ $("statCuts").textContent=monthRows.filter(x=>x.type==="income"&&x.appointment_id).length;
+}
+async function resetTemporaryData(){
+ const answer=prompt("ATENÇÃO: isso apagará TODOS os lançamentos financeiros e TODOS os agendamentos. Esta ação não pode ser desfeita.\n\nDigite APAGAR para continuar.");
+ if(answer!=="APAGAR")return;
+ const allIdsExcept="00000000-0000-0000-0000-000000000000";
+ const financial=await db.from("financial_transactions").delete().neq("id",allIdsExcept);
+ if(financial.error)return alert("Não foi possível apagar o financeiro: "+financial.error.message);
+ const appointments=await db.from("appointments").delete().neq("id",allIdsExcept);
+ if(appointments.error)return alert("O financeiro foi apagado, mas não foi possível apagar os agendamentos: "+appointments.error.message);
+ await loadFinancialBalance();
+ alert("Saldo e agendamentos foram zerados.");
+ showPanel("finance");
+}
+async function uploadMembershipPackageImage(file){
+ const path=`pacotes/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,"_")}`;
+ const up=await db.storage.from("barbearia-fotos").upload(path,file);
+ if(up.error)throw new Error(up.error.message);
+ return db.storage.from("barbearia-fotos").getPublicUrl(path).data.publicUrl;
+}
+async function saveMembershipPackage(e){
+ e.preventDefault();
+ let imageUrl=$("purl").value.trim()||null;
+ const file=$("pimage").files[0];
+ if(file){try{imageUrl=await uploadMembershipPackageImage(file)}catch(error){return alert("Não foi possível enviar a foto: "+error.message)}}
+ const r=await db.from("membership_packages").insert({name:$("pn").value.trim(),description:$("pd").value.trim()||null,price:Number($("pp").value),period:$("pper").value.trim()||"por mês",image_url:imageUrl,active:true});
+ if(r.error)return alert("Não foi possível adicionar o pacote: "+r.error.message);
+ await loadPackages();showPanel("packages");
+}
+async function editMembershipPackage(id){
+ const current=await db.from("membership_packages").select("*").eq("id",id).single();
+ if(current.error)return alert("Não foi possível abrir o pacote: "+current.error.message);
+ const name=prompt("Nome do pacote:",current.data.name);if(name===null)return;
+ const description=prompt("Descrição:",current.data.description||"");if(description===null)return;
+ const price=prompt("Preço (ex.: 89.90):",current.data.price);if(price===null)return;
+ const period=prompt("Período (ex.: por mês):",current.data.period||"por mês");if(period===null)return;
+ const value=Number(String(price).replace(",","."));
+ if(!name.trim()||!Number.isFinite(value)||value<0)return alert("Informe um nome e um preço válido.");
+ const r=await db.from("membership_packages").update({name:name.trim(),description:description.trim()||null,price:value,period:period.trim()||"por mês"}).eq("id",id);
+ if(r.error)return alert("Não foi possível editar: "+r.error.message);
+ await loadPackages();showPanel("packages");
+}
+async function changeMembershipPackageImage(id){
+ const picker=document.createElement("input");picker.type="file";picker.accept="image/*";
+ picker.onchange=async()=>{const file=picker.files[0];if(!file)return;try{const imageUrl=await uploadMembershipPackageImage(file);const r=await db.from("membership_packages").update({image_url:imageUrl}).eq("id",id);if(r.error)return alert("Não foi possível trocar a foto: "+r.error.message);await loadPackages();showPanel("packages")}catch(error){alert("Não foi possível enviar a foto: "+error.message)}};
+ picker.click();
+}
+async function deactivateMembershipPackage(id){
+ if(!confirm("Ocultar este pacote da página dos clientes?"))return;
+ const r=await db.from("membership_packages").update({active:false}).eq("id",id);
+ if(r.error)return alert("Não foi possível ocultar: "+r.error.message);
+ await loadPackages();showPanel("packages");
+}
+async function activateMembershipPackage(id){
+ const r=await db.from("membership_packages").update({active:true}).eq("id",id);
+ if(r.error)return alert("Não foi possível reativar: "+r.error.message);
+ await loadPackages();showPanel("packages");
+}
+async function editService(id){
+ const current=await db.from("services").select("*").eq("id",id).single();
+ if(current.error)return alert("Não foi possível abrir o serviço: "+current.error.message);
+ const name=prompt("Nome do serviço:",current.data.name);
+ if(name===null)return;
+ const description=prompt("Descrição do serviço:",current.data.description||"");
+ if(description===null)return;
+ const price=prompt("Preço do serviço (ex.: 35.00):",current.data.price);
+ if(price===null)return;
+ const value=Number(String(price).replace(",","."));
+ if(!name.trim()||!Number.isFinite(value)||value<0)return alert("Informe um nome e um preço válido.");
+ const r=await db.from("services").update({name:name.trim(),description:description.trim()||null,price:value}).eq("id",id);
+ if(r.error)return alert("Não foi possível editar: "+r.error.message);
+ services=[];await loadServices();showPanel("services");
+}
+async function deactivateService(id){
+ if(!confirm("Remover este serviço da lista de clientes? Os agendamentos antigos serão preservados."))return;
+ const r=await db.from("services").update({active:false}).eq("id",id);
+ if(r.error)return alert("Não foi possível remover: "+r.error.message);
+ services=[];await loadServices();showPanel("services");
+}
+async function activateService(id){
+ const r=await db.from("services").update({active:true}).eq("id",id);
+ if(r.error)return alert("Não foi possível reativar: "+r.error.message);
+ services=[];await loadServices();showPanel("services");
+}
+async function deleteClient(id,encodedName){
+ const name=decodeURIComponent(encodedName);
+ if(!confirm(`Apagar o cliente "${name}"? Esta ação não apaga os agendamentos antigos.`))return;
+ const r=await db.from("clients").delete().eq("id",id);
+ if(r.error)return alert("Não foi possível apagar o cliente: "+r.error.message);
+ alert("Cliente apagado.");
+ showPanel("clients");
+}
+async function saveAccount(e){
+ e.preventDefault();
+ const email=$("accountEmail").value.trim(),currentPassword=$("currentPassword").value,newPassword=$("newPassword").value,confirmPassword=$("confirmPassword").value;
+ if(newPassword&&newPassword!==confirmPassword)return alert("A confirmação da nova senha não confere.");
+ const {data:{user}}=await db.auth.getUser();
+ const changes={};
+ if(email!==user?.email)changes.email=email;
+ if(newPassword){changes.password=newPassword;changes.current_password=currentPassword}
+ if(!Object.keys(changes).length)return alert("Nenhuma alteração foi feita.");
+ const r=await db.auth.updateUser(changes);
+ if(r.error)return alert("Não foi possível atualizar: "+r.error.message);
+ alert("Dados atualizados. Alterações de e-mail podem exigir confirmação enviada pelo Supabase.");
+ showPanel("account");
+}
+async function savePixSettings(e){
+ e.preventDefault();
+ const r=await db.from("business_settings").update({pix_key:$("pixKey").value.trim(),pix_receiver_name:$("pixReceiverName").value.trim(),pix_city:$("pixCity").value.trim(),updated_at:new Date().toISOString()}).eq("id",true);
+ if(r.error)return alert("Não foi possível salvar a chave PIX: "+r.error.message);
+ await loadBusinessSettings();
+ alert("Chave PIX salva!");
+ showPanel("account");
+}
+async function uploadPhotos(){
+ const files=[...$("photoFiles").files];if(!files.length)return alert("Escolha pelo menos uma foto.");
+ for(const f of files){const path=`${crypto.randomUUID()}-${f.name.replace(/[^a-zA-Z0-9._-]/g,"_")}`;const up=await db.storage.from("barbearia-fotos").upload(path,f);if(up.error){alert(up.error.message);continue}const u=db.storage.from("barbearia-fotos").getPublicUrl(path);await db.from("photos").insert({url:u.data.publicUrl,caption:"Corte",active:true})}
+ await loadPhotos();alert("Fotos enviadas!");showPanel("photos");
+}
+async function changeAppointmentStatus(id,status){
+ const action={confirmed:"confirmar",completed:"concluir",cancelled:"cancelar"}[status]||"atualizar";
+ if(!confirm(`Deseja ${action} este agendamento?`))return;
+ let appointment=null;
+ if(status==="confirmed"){
+  const check=await db.from("appointments").select("id,client_name,services(name,price)").eq("id",id).single();
+  if(check.error)return alert("Não foi possível encontrar o agendamento: "+check.error.message);
+  appointment=check.data;
+  if(!appointment.services||Number(appointment.services.price)<=0)return alert("Esse agendamento não possui um serviço com preço válido.");
+ }
+ const r=await db.from("appointments").update({status}).eq("id",id);
+ if(r.error)return alert("Não foi possível atualizar: "+r.error.message);
+ if(status==="confirmed"){
+  const entry=await db.from("financial_transactions").insert({appointment_id:appointment.id,type:"income",category:"Serviços",description:`Corte confirmado: ${appointment.services.name} — ${appointment.client_name}`,amount:Number(appointment.services.price),transaction_date:localDate()});
+  if(entry.error&&entry.error.code!=="23505"){
+   await db.from("appointments").update({status:"booked"}).eq("id",id);
+   return alert("O agendamento não foi confirmado porque a entrada financeira não pôde ser salva. Execute finance.sql no Supabase e tente novamente.");
+  }
+  await loadFinancialBalance();
+ }
+ await loadAgenda();await loadTimes();
+ if($("pkgAgendaContent"))await loadPackageAgenda();
+}
+refreshBookingDate();loadServices();loadPackages();loadPhotos();loadTimes();loadBusinessSettings();
+</script>
+</body></html>
