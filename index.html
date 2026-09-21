@@ -98,7 +98,15 @@ nav a{padding:15px 22px;border-bottom:1px solid var(--line)}
 <main id="site"><section class="hero"><div class="container"><h1>Seu estilo começa aqui.</h1><p>Agende seu corte online, veja nossos trabalhos e escolha o melhor horário para você.</p><a class="btn" href="#agenda">Agendar horário</a></div></section>
 
 <section id="servicos"><div class="container"><div class="title"><h2>Serviços e preços</h2><p class="muted">Valores atualizados pelo painel do barbeiro.</p></div><div id="serviceCards" class="grid"></div></div></section>
-<section id="pacotes"><div class="container"><div class="title"><h2>Pacotes e assinaturas</h2><p class="muted">Planos pensados para você cuidar do visual todos os meses.</p></div><div id="packageCards" class="grid"></div></div></section>
+<section id="pacotes"><div class="container"><div class="title"><h2>Pacotes e assinaturas</h2><p class="muted">Planos pensados para você cuidar do visual todos os meses.</p></div><div id="packageCards" class="grid"></div>
+<div class="card" style="max-width:440px;margin:34px auto 0"><h3>Já é assinante?</h3><p class="muted">A assinatura é cobrada 1 vez por mês. Se cancelar, este mês continua valendo normalmente — ela só não é renovada no mês seguinte.</p>
+<div id="cancelSubFeedback" class="notice" style="display:none"></div>
+<form id="cancelSubForm">
+<label>WhatsApp usado na assinatura<input id="cancelSubPhone" required placeholder="(00) 00000-0000"></label>
+<label>Pacote<select id="cancelSubPackage" required></select></label>
+<button type="submit" class="btn alt">Cancelar assinatura</button>
+</form></div>
+</div></section>
 
 <section id="fotos"><div class="container"><div class="title"><h2>Nossos trabalhos</h2><p class="muted">Fotos reais dos cortes realizados.</p></div><div id="gallery" class="gallery"></div></div></section>
 
@@ -144,6 +152,7 @@ nav a{padding:15px 22px;border-bottom:1px solid var(--line)}
 <div class="adminbar">
 <button class="btn alt" onclick="showPanel('appointments')">Agenda</button>
 <button class="btn alt" onclick="showPanel('packageBookings')">Agenda de Pacotes</button>
+<button class="btn alt" onclick="showPanel('subscriptions')">Assinaturas</button>
 <button class="btn alt" onclick="showPanel('clients')">Clientes</button>
 <button class="btn alt" onclick="showPanel('hours')">Horários</button>
 <button class="btn alt" onclick="showPanel('services')">Serviços / Preços</button>
@@ -262,6 +271,7 @@ async function loadPackages(){
  let rows=[];
  if(db){const r=await db.from("membership_packages").select("*").eq("active",true).order("created_at");if(!r.error)rows=r.data||[]}
  $("packageCards").innerHTML=rows.length?rows.map(p=>`<div class="card package-card">${p.image_url?`<img src="${p.image_url}" alt="${p.name}">`:""}<div class="package-body"><h3>${p.name}</h3><p class="muted">${p.description||""}</p><div class="package-period">${p.period||"por mês"}</div><div class="price">${money(p.price)}</div><br><button type="button" class="btn pacote-btn" data-pid="${p.id}" data-pname="${(p.name||"").replace(/"/g,"&quot;")}" data-pprice="${p.price}">QUERO ESTE PACOTE</button></div></div>`).join(""):`<div class="card"><p class="muted">Em breve teremos pacotes e assinaturas disponíveis.</p></div>`;
+ $("cancelSubPackage").innerHTML='<option value="">Selecione</option>'+rows.map(p=>`<option value="${p.id}">${p.name}</option>`).join("");
 }
 async function loadPhotos(){
  let data=[];
@@ -283,7 +293,7 @@ async function loadTimes(){
      available=[];
      for(let m=from;m<=to;m+=30) available.push(String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0"));
    }else if(!hr.error && !hr.data){available=[]}
-   const r=await db.from("appointments").select("time").eq("date",$("date").value).neq("status","cancelled");
+   const r=await db.from("public_appointment_slots").select("time").eq("date",$("date").value);
    if(!r.error)booked=(r.data||[]).map(x=>String(x.time).slice(0,5))
    if($("date").value===localDate()){
      const now=new Date(),minutes=now.getHours()*60+now.getMinutes();
@@ -335,7 +345,7 @@ function fillPackageTimes(disabled=[]){$("pkgTime").innerHTML="";times.forEach(t
 async function loadPackageTimes(){
  let booked=[];
  if(db&&$("pkgDate").value){
-   const r=await db.from("appointments").select("time").eq("date",$("pkgDate").value).neq("status","cancelled");
+   const r=await db.from("public_appointment_slots").select("time").eq("date",$("pkgDate").value);
    if(!r.error)booked=(r.data||[]).map(x=>String(x.time).slice(0,5));
    if($("pkgDate").value===localDate()){
      const now=new Date(),minutes=now.getHours()*60+now.getMinutes();
@@ -345,6 +355,7 @@ async function loadPackageTimes(){
  fillPackageTimes(booked);
 }
 $("pkgDate").addEventListener("change",loadPackageTimes);
+$("cancelSubForm").addEventListener("submit",cancelPackageSubscription);
 document.addEventListener("click",e=>{
  const btn=e.target.closest(".pacote-btn");
  if(btn)openPackageModal(btn.dataset.pid,btn.dataset.pname,btn.dataset.pprice);
@@ -353,7 +364,17 @@ $("packageBookingForm").addEventListener("submit",async e=>{
  e.preventDefault();
  if(!db){$("packageNotice").className="notice error";$("packageNotice").style.display="block";$("packageNotice").textContent="O site ainda não está conectado ao banco online.";return}
  if(!selectedPackage){closePackageModal();return}
- const b={client_name:$("pkgName").value.trim(),phone:$("pkgPhone").value.trim(),package_id:selectedPackage.id,service_id:null,date:$("pkgDate").value,time:$("pkgTime").value,status:"booked"};
+ const clientName=$("pkgName").value.trim(),phone=$("pkgPhone").value.trim();
+
+ const sub=await db.rpc("subscribe_to_package",{p_phone:phone,p_client_name:clientName,p_package_id:selectedPackage.id});
+ if(sub.error||!sub.data?.success){
+  $("packageNotice").className="notice error";
+  $("packageNotice").style.display="block";
+  $("packageNotice").textContent=sub.data?.message||"Não foi possível confirmar a assinatura: "+(sub.error?.message||"erro desconhecido");
+  return;
+ }
+
+ const b={client_name:clientName,phone:phone,package_id:selectedPackage.id,service_id:null,date:$("pkgDate").value,time:$("pkgTime").value,status:"booked"};
  const r=await db.from("appointments").insert(b);
  if(r.error){
    console.error("Supabase package appointment error:",r.error);
@@ -367,21 +388,44 @@ $("packageBookingForm").addEventListener("submit",async e=>{
  if(cr.error)console.warn("Client save error:",cr.error);
  const text=encodeURIComponent(`Olá! Gostaria de confirmar meu agendamento do pacote na Barbearia Fagundes.\nNome: ${b.client_name}\nPacote: ${selectedPackage.name}\nData: ${b.date.split("-").reverse().join("/")}\nHorário: ${b.time}`);
  if(C.WHATSAPP_NUMBER)setTimeout(()=>window.open(`https://wa.me/${C.WHATSAPP_NUMBER}?text=${text}`,"_blank"),600);
- if(businessSettings.pix_key){
+
+ if(sub.data.paid){
+  $("packageNotice").className="notice";
+  $("packageNotice").style.display="block";
+  $("packageNotice").textContent="Agendamento confirmado! Sua assinatura deste mês já está paga, nenhum novo pagamento é necessário.";
+  setTimeout(closePackageModal,2400);
+ }else if(businessSettings.pix_key){
   $("packageBookingForm").classList.add("hidden");
-  $("pixAmount").textContent=money(selectedPackage.price);
+  $("pixAmount").textContent=money(sub.data.price)+" (assinatura do mês)";
   $("pixKeyDisplay").value=businessSettings.pix_key;
   $("pixQr").innerHTML="";
-  const payload=buildPixPayload(businessSettings.pix_key,businessSettings.pix_receiver_name,businessSettings.pix_city,selectedPackage.price);
+  const payload=buildPixPayload(businessSettings.pix_key,businessSettings.pix_receiver_name,businessSettings.pix_city,sub.data.price);
   new QRCode($("pixQr"),{text:payload,width:180,height:180});
   $("pixPaymentBox").classList.remove("hidden");
  }else{
   $("packageNotice").className="notice";
   $("packageNotice").style.display="block";
-  $("packageNotice").textContent="Agendamento do pacote confirmado! O barbeiro ainda não cadastrou uma chave PIX, então o pagamento pode ser combinado diretamente.";
-  setTimeout(closePackageModal,2200);
+  $("packageNotice").textContent="Agendamento do pacote confirmado! O barbeiro ainda não cadastrou uma chave PIX, então o pagamento da assinatura pode ser combinado diretamente.";
+  setTimeout(closePackageModal,2400);
  }
 });
+
+async function cancelPackageSubscription(e){
+ e.preventDefault();
+ const phone=$("cancelSubPhone").value.trim(),packageId=$("cancelSubPackage").value;
+ const feedback=$("cancelSubFeedback");
+ feedback.style.display="block";
+ if(!packageId){feedback.className="notice error";feedback.textContent="Escolha o pacote.";return}
+ const r=await db.rpc("cancel_package_subscription",{p_phone:phone,p_package_id:packageId});
+ if(r.error||!r.data?.success){
+  feedback.className="notice error";
+  feedback.textContent=r.data?.message||"Não foi possível cancelar: "+(r.error?.message||"erro desconhecido");
+  return;
+ }
+ feedback.className="notice";
+ feedback.textContent="Assinatura marcada para cancelamento. Este mês continua normalmente, ela só não será renovada no mês que vem.";
+ $("cancelSubForm").reset();
+}
 
 async function login(e){
  e.preventDefault();if(!db)return alert("O site ainda não está conectado. Preencha config.js.");
@@ -402,8 +446,13 @@ async function showPanel(type){
  }
  if(type==="packageBookings"){
   const today=localDate();
-  p.innerHTML=`<h3>Agenda de Pacotes</h3><p class="muted">Agendamentos feitos a partir da página de Pacotes e Assinaturas — não aparecem na aba Agenda, que é só de cortes avulsos.</p><div class="filterbar"><label>Escolha o dia<input type="date" id="pkgAgendaDate" value="${today}" onchange="loadPackageAgenda()"></label></div><div id="pkgAgendaContent"></div>`;
+  p.innerHTML=`<h3>Agenda de Pacotes</h3><p class="muted">Horários agendados por clientes do pacote — não aparecem na aba Agenda, que é só de cortes avulsos. O pagamento da assinatura é controlado na aba "Assinaturas", não aqui.</p><div class="filterbar"><label>Escolha o dia<input type="date" id="pkgAgendaDate" value="${today}" onchange="loadPackageAgenda()"></label></div><div id="pkgAgendaContent"></div>`;
   await loadPackageAgenda();
+  return;
+ }
+ if(type==="subscriptions"){
+  p.innerHTML=`<h3>Assinaturas de pacote</h3><p class="muted">Cada assinatura é cobrada 1 vez por mês, não por visita. Confirme aqui o recebimento do PIX de cada cliente.</p><div id="subscriptionsContent"></div>`;
+  await loadSubscriptions();
   return;
  }
  if(type==="finance"){
@@ -462,18 +511,23 @@ async function loadAgenda(){
 }
 async function loadPackageAgenda(){
  const date=$("pkgAgendaDate").value;if(!date)return;
- const r=await db.from("appointments").select("*, membership_packages(name,price)").eq("date",date).not("package_id","is",null).order("time");
+ const r=await db.from("appointments").select("*, membership_packages(name)").eq("date",date).not("package_id","is",null).order("time");
  const rows=r.data||[];
- $("pkgAgendaContent").innerHTML=rows.length?`<div class="tablewrap"><table class="table"><tr><th>Horário</th><th>Cliente</th><th>WhatsApp</th><th>Pacote</th><th>Status</th><th>Pagamento</th><th>Ações</th></tr>${rows.map(a=>`<tr><td>${String(a.time).slice(0,5)}</td><td>${a.client_name}</td><td>${a.phone}</td><td>${a.membership_packages?.name||""}</td><td>${statusLabel(a.status)}</td><td class="${a.package_paid?"positive":"negative"}">${a.package_paid?"Pago":"Pendente"}</td><td>${!a.package_paid?`<button class="btn" onclick="confirmPackagePayment('${a.id}',${a.membership_packages?.price||0},'${(a.membership_packages?.name||"").replace(/'/g,"\\'")}','${(a.client_name||"").replace(/'/g,"\\'")}')">CONFIRMAR PAGAMENTO</button> `:""}${(a.status==="booked"||a.status==="confirmed")?`<button class="btn danger" onclick="changeAppointmentStatus('${a.id}','cancelled')">CANCELAR</button>`:""}</td></tr>`).join("")}</table></div>`:`<div class="card"><p class="muted">Nenhum agendamento de pacote para este dia.</p></div>`;
+ $("pkgAgendaContent").innerHTML=rows.length?`<div class="tablewrap"><table class="table"><tr><th>Horário</th><th>Cliente</th><th>WhatsApp</th><th>Pacote</th><th>Status</th><th>Ações</th></tr>${rows.map(a=>`<tr><td>${String(a.time).slice(0,5)}</td><td>${a.client_name}</td><td>${a.phone}</td><td>${a.membership_packages?.name||""}</td><td>${statusLabel(a.status)}</td><td>${(a.status==="booked"||a.status==="confirmed")?`<button class="btn danger" onclick="changeAppointmentStatus('${a.id}','cancelled')">CANCELAR</button>`:""}</td></tr>`).join("")}</table></div>`:`<div class="card"><p class="muted">Nenhum agendamento de pacote para este dia.</p></div>`;
 }
-async function confirmPackagePayment(id,price,packageName,clientName){
- if(!confirm(`Confirmar recebimento de ${money(price)} via PIX referente a "${packageName}"?`))return;
- const entry=await db.from("financial_transactions").insert({type:"income",category:"Pacotes",description:`Pacote confirmado: ${packageName} — ${clientName}`,amount:Number(price),transaction_date:localDate()});
+async function loadSubscriptions(){
+ const r=await db.from("package_subscriptions").select("*, membership_packages(name,price)").order("created_at",{ascending:false});
+ const rows=r.data||[];
+ $("subscriptionsContent").innerHTML=rows.length?`<div class="tablewrap"><table class="table"><tr><th>Mês</th><th>Cliente</th><th>WhatsApp</th><th>Pacote</th><th>Pagamento</th><th>Renovação</th><th>Ações</th></tr>${rows.map(s=>`<tr><td>${new Date(s.period_month+"T12:00:00").toLocaleDateString("pt-BR",{month:"short",year:"numeric"})}</td><td>${s.client_name}</td><td>${s.phone}</td><td>${s.membership_packages?.name||""}</td><td class="${s.paid?"positive":"negative"}">${s.paid?"Pago":"Pendente"}</td><td class="${s.cancel_requested?"negative":"positive"}">${s.cancel_requested?"Cancelada p/ mês que vem":"Renova normalmente"}</td><td>${!s.paid?`<button class="btn" onclick="confirmSubscriptionPayment('${s.id}',${s.membership_packages?.price||0},'${(s.membership_packages?.name||"").replace(/'/g,"\\'")}','${(s.client_name||"").replace(/'/g,"\\'")}')">CONFIRMAR PAGAMENTO</button>`:""}</td></tr>`).join("")}</table></div>`:`<div class="card"><p class="muted">Nenhuma assinatura registrada ainda.</p></div>`;
+}
+async function confirmSubscriptionPayment(id,price,packageName,clientName){
+ if(!confirm(`Confirmar recebimento de ${money(price)} via PIX referente à assinatura "${packageName}" de ${clientName}?`))return;
+ const entry=await db.from("financial_transactions").insert({type:"income",category:"Pacotes",description:`Assinatura confirmada: ${packageName} — ${clientName}`,amount:Number(price),transaction_date:localDate()});
  if(entry.error)return alert("Não foi possível lançar no financeiro: "+entry.error.message);
- const upd=await db.from("appointments").update({package_paid:true}).eq("id",id);
- if(upd.error)return alert("O lançamento foi salvo, mas não foi possível marcar como pago: "+upd.error.message);
+ const upd=await db.from("package_subscriptions").update({paid:true}).eq("id",id);
+ if(upd.error)return alert("O lançamento foi salvo, mas não foi possível marcar a assinatura como paga: "+upd.error.message);
  await loadFinancialBalance();
- await loadPackageAgenda();
+ await loadSubscriptions();
 }
 async function saveFinancialTransaction(e){
  e.preventDefault();
