@@ -1,0 +1,37 @@
+[hidden]{display:none!important}
+body{padding-bottom:2rem}
+.lf{max-width:380px;margin-top:1rem}
+#lm,#tm{min-height:1.4rem;margin-top:.8rem;font-weight:600;color:var(--red)}
+#tm.ok{color:#1c7a3d}
+.sm{padding:.45rem .9rem;font:600 .85rem var(--f);border:1.5px solid var(--ink);background:#fff;color:var(--ink);border-radius:4px;cursor:pointer}
+.sm:hover{background:var(--ink);color:var(--bone)}
+.sm.no:hover{background:var(--red);border-color:var(--red)}
+
+.tabs{display:flex;gap:.4rem;overflow-x:auto;border-bottom:2px solid var(--ink)}
+.tabs button{flex:none;background:none;border:0;padding:.8rem 1.1rem;font:700 1rem var(--f);color:var(--mute);cursor:pointer;border-bottom:4px solid transparent;margin-bottom:-2px}
+.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--red)}
+#app{padding-top:1.5rem}
+
+.bar,.inl{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:1rem 0}
+.bar input,.inl input,.inl select{width:auto;flex:1 1 130px;margin:0}
+.inl select{padding:.75rem;border:1.5px solid var(--ink);border-radius:4px;font:inherit;background:#fff}
+.inl .btn{flex:none}
+.ap{display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:center;padding:1rem .5rem;border-top:1px solid var(--line)}
+.ap b{display:block;font-size:1.1rem}
+.ap small{display:block;color:var(--mute)}
+.ap.cancelled{opacity:.5}
+.acts{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:flex-end;align-items:center}
+.tag{font-size:.8rem;font-weight:700;padding:.2rem .6rem;border-radius:99px;background:var(--ink);color:var(--bone)}
+.tag.booked{background:var(--blue)}
+.tag.completed,.tag.paid{background:#1c7a3d}
+.tag.cancelled{background:var(--mute)}
+.tag.wait{background:var(--red)}
+.pin{width:100px!important;margin:0!important;padding:.4rem!important}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1rem 0}
+.sum div{border:2px solid var(--ink);border-radius:6px;padding:.8rem 1rem}
+.sum small{display:block;color:var(--mute)}
+.sum b{font-size:1.4rem}
+.inc{color:#1c7a3d;font-weight:800}
+.exp{color:var(--red);font-weight:800}
+.err{color:var(--red);font-weight:600}
+@media(max-width:700px){.ap{grid-template-columns:1fr}.acts{justify-content:flex-start}.sum b{font-size:1.1rem}}
