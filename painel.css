@@ -35,3 +35,6 @@ body{padding-bottom:2rem}
 .exp{color:var(--red);font-weight:800}
 .err{color:var(--red);font-weight:600}
 @media(max-width:700px){.ap{grid-template-columns:1fr}.acts{justify-content:flex-start}.sum b{font-size:1.1rem}}
+.nb{display:flex;gap:.6rem;align-items:center;background:var(--blue);color:#fff;padding:.7rem 1rem;border-radius:6px;margin-bottom:1rem;font-weight:700}
+.nb span{flex:1}
+.nb .sm{background:#fff;border-color:#fff}
