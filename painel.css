@@ -38,3 +38,9 @@ body{padding-bottom:2rem}
 .nb{display:flex;gap:.6rem;align-items:center;background:var(--blue);color:#fff;padding:.7rem 1rem;border-radius:6px;margin-bottom:1rem;font-weight:700}
 .nb span{flex:1}
 .nb .sm{background:#fff;border-color:#fff}
+@media(max-width:700px){
+  .tabs{position:fixed;top:auto;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(4,1fr);gap:0;overflow:visible;background:var(--bone);border-top:3px solid var(--ink);border-bottom:0;padding-bottom:env(safe-area-inset-bottom,0px)}
+  .tabs button{padding:.9rem .2rem;min-height:56px;font-size:.8rem;border-bottom:0;border-top:4px solid transparent;margin:0}
+  .tabs button[aria-selected=true]{background:#fff;border-top-color:var(--red)}
+  body{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+}
