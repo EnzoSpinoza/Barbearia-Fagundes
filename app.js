@@ -110,7 +110,7 @@ $('#f').addEventListener('submit',async e=>{
       say('Assinatura registrada. O barbeiro confirma o pagamento e entra em contato.',true);
     }
   }catch(err){
-    if(err.code==='23505'){say('Esse horário acabou de ser ocupado. Escolha outro.');if(dayDate)loadSlots(dayDate)}
+    if(err.code==='23505'){say('Esse horário acabou de ser ocupado. Escolha outro.');slot=null;if(dayDate)loadSlots(dayDate)}
     else say(err.message||'Não foi possível concluir. Tente de novo.');
   }
   btn.disabled=false;
