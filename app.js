@@ -17,6 +17,10 @@ async function api(p,o={}){
 }
 
 let hours={},items={},mode,cur,day,dayDate,slot;
+let pix=null;
+async function loadPix(){
+  try{const r=await api('/rest/v1/business_settings?select=pix_key,pix_receiver_name&id=eq.true');pix=r[0]&&r[0].pix_key?r[0]:null}catch{}
+}
 const dlg=$('#dlg'),msg=$('#msg');
 const say=(t,ok)=>{msg.textContent=t;msg.className=ok?'ok':''};
 
@@ -47,6 +51,9 @@ function openDlg(m,it){
   $('#dsub').textContent=money(it.price)+(m==='pkg'?' '+it.period:'');
   $('#pick').hidden=m==='pkg';
   $('#go').textContent=m==='pkg'?'Assinar pacote':'Confirmar agendamento';
+  $('#pixok').checked=false;
+$('#pixbox').hidden=!pix;
+if(pix){$('#pixkey').textContent=pix.pix_key;$('#pixinfo').textContent='Valor: '+money(it.price)+(pix.pix_receiver_name?' · Recebedor: '+pix.pix_receiver_name:'')}
   $('#days').innerHTML='';
   $('#slots').innerHTML='<span class="note">Escolha um dia.</span>';
   if(m==='svc')buildDays();
@@ -101,12 +108,12 @@ $('#f').addEventListener('submit',async e=>{
   try{
     if(mode==='svc'){
       await api('/rest/v1/appointments',{method:'POST',headers:{Prefer:'return=minimal'},
-        body:JSON.stringify({client_name:name,phone,service_id:cur.id,date:day,time:slot+':00'})});
+        body:JSON.stringify({client_name:name,phone,service_id:cur.id,date:day,time:slot+':00',pix_status:$('#pixok').checked?'informed':'none'})});
       say(`Agendado para ${dayDate.toLocaleDateString('pt-BR')} às ${slot}. Até lá!`,true);
       slot=null;loadSlots(dayDate);
     }else{
       await api('/rest/v1/rpc/subscribe_to_package',{method:'POST',
-        body:JSON.stringify({p_phone:phone,p_client_name:name,p_package_id:cur.id})});
+        body:JSON.stringify({p_phone:phone,p_client_name:name,p_package_id:cur.id,p_pix_informed:$('#pixok').checked})});
       say('Assinatura registrada. O barbeiro confirma o pagamento e entra em contato.',true);
     }
   }catch(err){
@@ -123,4 +130,9 @@ const nav=$('#nav'),mb=$('#menu');
 mb.onclick=()=>{const o=nav.classList.toggle('open');mb.setAttribute('aria-expanded',o)};
 nav.onclick=e=>{if(e.target.tagName==='A'){nav.classList.remove('open');mb.setAttribute('aria-expanded',false)}};
 
-init();
+$('#pixcopy').onclick=async()=>{
+  const b=$('#pixcopy');
+  try{await navigator.clipboard.writeText(pix.pix_key);b.textContent='Copiado!'}catch{b.textContent='Copie manualmente'}
+  setTimeout(()=>b.textContent='Copiar',2000);
+};
+init();loadPix();
