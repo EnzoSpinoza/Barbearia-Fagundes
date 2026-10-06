@@ -57,9 +57,11 @@ const tabs={
     $('#v').innerHTML=`<div class="bar"><label class="lab" for="ad" style="margin:0">Dia</label><input type="date" id="ad" value="${d}"></div><ul class="list">`+
       (rows.map(a=>{
         const nm=a.services?.name||'Pacote: '+(a.membership_packages?.name||'');
+        const pxTag=a.pix_status==='paid'?'<span class="tag paid">Pix pago</span>':a.pix_status==='informed'?'<span class="tag wait">Cliente diz que pagou</span>':'';
+const pxBtn=a.pix_status==='informed'?`<button class="sm" data-a="pixok" data-id="${a.id}">Confirmar Pix</button>`:'';
         const b=(s,l,c='')=>`<button class="sm ${c}" data-a="st" data-id="${a.id}" data-s="${s}">${l}</button>`;
-        const acts=(a.status==='booked'?b('confirmed','Confirmar'):'')+(a.status==='booked'||a.status==='confirmed'?b('completed','Concluir')+b('cancelled','Cancelar','no'):'')+(a.package_id?'':`<button class="sm no" data-a="delap" data-id="${a.id}">Excluir</button>`);
-        return `<li class="ap ${a.status}"><div><b>${a.time.slice(0,5)} — ${esc(a.client_name)}</b><small>${esc(nm)} · <a href="https://wa.me/55${a.phone.replace(/\D/g,'')}" target="_blank" rel="noopener">${esc(a.phone)}</a></small></div><div class="acts"><span class="tag ${a.status}">${ST[a.status]}</span>${acts}</div></li>`;
+        const acts=pxBtn+(a.status==='booked'?b('confirmed','Confirmar'):'')+(a.status==='booked'||a.status==='confirmed'?b('completed','Concluir')+b('cancelled','Cancelar','no'):'')+(a.package_id?'':`<button class="sm no" data-a="delap" data-id="${a.id}">Excluir</button>`);
+        return `<li class="ap ${a.status}"><div><b>${a.time.slice(0,5)} — ${esc(a.client_name)}</b><small>${esc(nm)} · <a href="https://wa.me/55${a.phone.replace(/\D/g,'')}" target="_blank" rel="noopener">${esc(a.phone)}</a></small></div><div class="acts"><span class="tag ${a.status}">${ST[a.status]}</span>${pxTag}${acts}</div></li>`;
       }).join('')||'<li class="note" style="padding:1rem .5rem">Nenhum agendamento neste dia.</li>')+'</ul>';
     $('#ad').onchange=e=>{if(e.target.value){agDate=e.target.value;tab('agenda')}};
   },
@@ -103,7 +105,7 @@ const tabs={
     cache=Object.fromEntries(r.map(x=>[x.id,x]));
     $('#v').innerHTML='<ul class="list">'+(r.map(x=>{
       const mes=x.period_month.slice(5,7)+'/'+x.period_month.slice(0,4);
-      const tag=x.status==='cancelled'?'<span class="tag cancelled">Cancelada</span>':x.paid?'<span class="tag paid">Pago</span>':'<span class="tag wait">Aguardando pagamento</span>';
+      const tag=x.status==='cancelled'?'<span class="tag cancelled">Cancelada</span>':x.paid?'<span class="tag paid">Pago</span>':(x.pix_informed?'<span class="tag wait">Cliente diz que pagou</span>':'<span class="tag wait">Aguardando pagamento</span>');
       const pay=x.status==='active'&&!x.paid?`<button class="sm" data-a="pay" data-id="${x.id}">Confirmar pagamento</button>`:'';
       const del=`<button class="sm no" data-a="delsub" data-id="${x.id}">Excluir</button>`;
       return `<li class="ap ${x.status==='cancelled'?'cancelled':''}"><div><b>${esc(x.client_name)} — ${esc(x.membership_packages?.name||'')}</b><small>${mes} · <a href="https://wa.me/55${x.phone.replace(/\D/g,'')}" target="_blank" rel="noopener">${esc(x.phone)}</a>${x.cancel_requested?' · pediu cancelamento (vale no mês seguinte)':''}</small></div><div class="acts">${tag}${pay}${del}</div></li>`;
@@ -118,6 +120,10 @@ $('#v').addEventListener('click',e=>{
   if(a==='fech')return fechamento();
 if(a==='fechback')return tab('financeiro');
 if(a==='print')return window.print();
+  if(a==='pixok')return run(async()=>{
+  await api('/rest/v1/appointments?id=eq.'+id,{method:'PATCH',headers:MIN,body:JSON.stringify({pix_status:'paid'})});
+  await tab('agenda');say('Pix confirmado.',true);
+});
   if(a==='st')run(async()=>{
     const x=cache[id],s=b.dataset.s;
     await api('/rest/v1/appointments?id=eq.'+id,{method:'PATCH',headers:MIN,body:JSON.stringify({status:s})});
