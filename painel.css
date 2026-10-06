@@ -44,3 +44,4 @@ body{padding-bottom:2rem}
   .tabs button[aria-selected=true]{background:#fff;border-top-color:var(--red)}
   body{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
 }
+@media print{header,.tabs,.bar,#tm,.nb{display:none!important}}
