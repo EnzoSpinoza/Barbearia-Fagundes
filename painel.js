@@ -90,7 +90,14 @@ const tabs={
       fnMonth=$('#fdt').value.slice(0,7);await tab('financeiro');say('Lançamento salvo.',true);
     })};
   },
-
+  async pix(){
+    const r=(await api('/rest/v1/business_settings?select=*'))[0]||{};
+    $('#v').innerHTML=`<form id="pf" class="lf"><label class="lab" for="pk">Chave Pix</label><input id="pk" value="${esc(r.pix_key||'')}" placeholder="CPF, e-mail, telefone ou chave aleatória" required><label class="lab" for="pn">Nome do recebedor</label><input id="pn" value="${esc(r.pix_receiver_name||'')}" required><label class="lab" for="pc">Cidade</label><input id="pc" value="${esc(r.pix_city||'')}" required><button class="btn wide">Salvar chave Pix</button></form>`;
+    $('#pf').onsubmit=e=>{e.preventDefault();run(async()=>{
+      await api('/rest/v1/business_settings?id=eq.true',{method:'PATCH',headers:MIN,body:JSON.stringify({pix_key:$('#pk').value.trim(),pix_receiver_name:$('#pn').value.trim(),pix_city:$('#pc').value.trim(),updated_at:new Date().toISOString()})});
+      say('Chave Pix salva.',true);
+    })};
+  },
   async assinaturas(){
     const r=await api('/rest/v1/package_subscriptions?select=*,membership_packages(name,price)&order=period_month.desc,created_at.desc');
     cache=Object.fromEntries(r.map(x=>[x.id,x]));
