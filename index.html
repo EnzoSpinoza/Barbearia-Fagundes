@@ -63,6 +63,12 @@
     <input id="nm" autocomplete="name" required>
     <label class="lab" for="ph">Telefone com DDD</label>
     <input id="ph" type="tel" inputmode="tel" autocomplete="tel" required>
+    <div id="pixbox" hidden>
+  <p class="lab">Pagamento por Pix</p>
+  <p id="pixinfo" class="note"></p>
+  <div class="pixrow"><code id="pixkey"></code><button type="button" id="pixcopy" class="sm">Copiar</button></div>
+  <label class="chk"><input type="checkbox" id="pixok"> Já fiz o Pix</label>
+</div>
     <p id="msg" role="status"></p>
     <button id="go" class="btn wide">Confirmar agendamento</button>
   </form>
