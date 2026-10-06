@@ -11,7 +11,7 @@ const ST={booked:'Agendado',confirmed:'Confirmado',completed:'Concluído',cancel
 const MIN={Prefer:'return=minimal'};
 
 const TITLE='Painel — Fagundes Barbearia';
-let T=sessionStorage.getItem('t'),cur='agenda',agDate,fnMonth,cache={},poll,seen,pend={a:[],s:[]};
+let T=sessionStorage.getItem('t'),cur='agenda',agDate,fnMonth,fnData,cache={},poll,seen,pend={a:[],s:[]};
 
 async function api(p,o={}){
   const r=await fetch(U+p,{...o,headers:{apikey:K,Authorization:'Bearer '+(T||K),'Content-Type':'application/json',...o.headers}});
@@ -79,7 +79,8 @@ const tabs={
     const[y,mo]=m.split('-').map(Number),to=iso(new Date(y,mo,1));
     const r=await api(`/rest/v1/financial_transactions?transaction_date=gte.${m}-01&transaction_date=lt.${to}&order=transaction_date.desc,created_at.desc`);
     const sum=t=>r.filter(x=>x.type===t).reduce((a,x)=>a+Number(x.amount),0),i=sum('income'),o=sum('expense');
-    $('#v').innerHTML=`<div class="bar"><label class="lab" for="fm" style="margin:0">Mês</label><input type="month" id="fm" value="${m}"></div>
+    fnData={r,m,i,o};
+    $('#v').innerHTML=`<div class="bar"><label class="lab" for="fm" style="margin:0">Mês</label><input type="month" id="fm" value="${m}"><button class="sm" data-a="fech">Fechamento do mês</button></div>
       <div class="sum"><div><small>Entradas</small><b class="inc">${money(i)}</b></div><div><small>Saídas</small><b class="exp">${money(o)}</b></div><div><small>Saldo</small><b>${money(i-o)}</b></div></div>
       <form id="ff" class="inl"><select id="ft" aria-label="Tipo"><option value="income">Entrada</option><option value="expense">Saída</option></select><input id="fc" placeholder="Categoria" required><input id="fd" placeholder="Descrição"><input id="fa" type="number" step="0.01" min="0.01" placeholder="Valor" required><input id="fdt" type="date" value="${iso(new Date())}" required><button class="btn">Lançar</button></form>
       <ul class="list">`+(r.map(x=>`<li class="ap"><div><b>${esc(x.category)}</b><small>${br(x.transaction_date)}${x.description?' — '+esc(x.description):''}</small></div><div class="acts"><span class="${x.type==='income'?'inc':'exp'}">${x.type==='income'?'+':'−'} ${money(x.amount)}</span><button class="sm no" data-a="del" data-id="${x.id}">Excluir</button></div></li>`).join('')||'<li class="note" style="padding:1rem .5rem">Sem lançamentos neste mês.</li>')+'</ul>';
@@ -107,6 +108,9 @@ const tabs={
 $('#v').addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b||b.tagName!=='BUTTON')return;
   const id=b.dataset.id,a=b.dataset.a;
+  if(a==='fech')return fechamento();
+if(a==='fechback')return tab('financeiro');
+if(a==='print')return window.print();
   if(a==='st')run(async()=>{
     const x=cache[id],s=b.dataset.s;
     await api('/rest/v1/appointments?id=eq.'+id,{method:'PATCH',headers:MIN,body:JSON.stringify({status:s})});
@@ -147,7 +151,20 @@ $('#v').addEventListener('change',e=>{
   const i=e.target;if(i.dataset.a!=='price')return;
   run(()=>api('/rest/v1/services?id=eq.'+i.dataset.id,{method:'PATCH',headers:MIN,body:JSON.stringify({price:+i.value})}),'Preço atualizado.');
 });
-
+/* ---------- fechamento do mês ---------- */
+function fechamento(){
+  const{r,m,i,o}=fnData,lucro=i-o,[y,mo]=m.split('-');
+  const meses=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  const lista=t=>{
+    const c={};r.filter(x=>x.type===t).forEach(x=>c[x.category]=(c[x.category]||0)+Number(x.amount));
+    return Object.entries(c).sort((a,b)=>b[1]-a[1]).map(([n,v])=>`<li class="ap"><div><b>${esc(n)}</b></div><div class="acts">${money(v)}</div></li>`).join('')||'<li class="note" style="padding:1rem .5rem">Nada neste mês.</li>';
+  };
+  $('#v').innerHTML=`<div class="bar"><button class="sm" data-a="fechback">← Voltar</button><button class="sm" data-a="print">Imprimir / Salvar PDF</button></div>
+    <h3>Fechamento de ${meses[mo-1]} de ${y}</h3>
+    <div class="sum"><div><small>Faturamento</small><b class="inc">${money(i)}</b></div><div><small>Gastos</small><b class="exp">${money(o)}</b></div><div><small>Lucro</small><b class="${lucro<0?'exp':'inc'}">${money(lucro)}</b></div></div>
+    <h4>Entradas por categoria</h4><ul class="list">${lista('income')}</ul>
+    <h4>Saídas por categoria</h4><ul class="list">${lista('expense')}</ul>`;
+}
 /* ---------- aviso de novidades + atualização a cada 30 s ---------- */
 const latest=async t=>(await api(`/rest/v1/${t}?select=created_at&order=created_at.desc&limit=1`))[0]?.created_at||'1970-01-01T00:00:00Z';
 function watch(){
